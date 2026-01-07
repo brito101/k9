@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ChangelogController;
 use App\Http\Controllers\Admin\PentestController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VulnerabilityController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,11 @@ Route::group(['middleware' => ['auth', 'access']], function () {
 
         /** Pentests */
         Route::resource('pentests', PentestController::class);
+
+        /** Vulnerabilities */
+        Route::post('vulnerabilities/create', [VulnerabilityController::class, 'create'])->name('vulnerabilities.create.post');
+        Route::get('pentests/{pentest}/vulnerabilities/datatable', [VulnerabilityController::class, 'datatable'])->name('pentests.vulnerabilities.datatable');
+        Route::resource('vulnerabilities', VulnerabilityController::class)->except(['create']);
 
         /**
          * ACL

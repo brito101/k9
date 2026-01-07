@@ -245,12 +245,19 @@ $administrador->syncPermissions($permissions);
 ```
 
 #### Select2
+**IMPORTANTE**: Sempre use o componente `x-adminlte-select2` ao invés de `<select>` nativo.
+
 ```php
 <x-adminlte-select2 name="role">
     @foreach ($roles as $role)
         <option value="{{ $role->name }}">{{ $role->name }}</option>
     @endforeach
 </x-adminlte-select2>
+```
+
+**Não esqueça de ativar o plugin na view:**
+```php
+@section('plugins.select2', true)
 ```
 
 #### Input Switch
@@ -792,6 +799,82 @@ use HasUuids;
 public $incrementing = false;
 protected $keyType = 'string';
 ```
+
+---
+
+## 🛠️ HELPERS DO SISTEMA
+
+### 1. TextProcessor
+
+Helper para processamento de campos de texto rico (Summernote) com imagens.
+
+**Métodos disponíveis:**
+
+#### store()
+Processa e armazena imagens base64 de campos rich text (Summernote).
+
+```php
+/**
+ * @param string $title - Identificador único para nomenclatura das imagens (ex: UUID do registro pai)
+ * @param string $package - Subdiretório de armazenamento (ex: 'pentests/vulnerabilities')
+ * @param string $text - Conteúdo HTML com imagens base64
+ * @param bool $xss - Prevenção XSS (padrão: false)
+ * @return string - HTML processado com URLs das imagens salvas
+ */
+TextProcessor::store(string $title, string $package, string $text = '', bool $xss = false): string
+```
+
+**Exemplo de uso em controllers:**
+```php
+// Ao criar um registro
+if ($request->observations) {
+    $data['observations'] = TextProcessor::store(
+        $request->pentest_id,                    // UUID do registro pai
+        'pentests/vulnerabilities',               // Subdiretório
+        $request->observations                    // Conteúdo HTML
+    );
+}
+
+// Ao editar um registro
+if ($request->risk_assessment) {
+    $data['risk_assessment'] = TextProcessor::store(
+        $data['application_name'],                // Nome da aplicação
+        'pentests',                               // Diretório
+        $request->risk_assessment
+    );
+}
+```
+
+**O que o método faz:**
+- Detecta imagens base64 no HTML
+- Converte para arquivos PNG
+- Salva em `storage/app/public/{package}/text/`
+- Substitui src base64 por URL do arquivo salvo
+- Remove atributos XSS (onerror, etc)
+
+**Estrutura de armazenamento:**
+```
+storage/app/public/
+└── pentests/
+    ├── text/                      # Imagens de campos rich text do pentest
+    └── vulnerabilities/
+        └── text/                  # Imagens de observações de vulnerabilidades
+```
+
+
+```
+
+### 2. CheckPermission
+
+Já documentado na seção de Permissões acima.
+
+### 3. MakeHash
+
+Helper para geração de hashes customizados (documentação a ser expandida).
+
+### 4. Command
+
+Helper para execução de comandos do sistema (documentação a ser expandida).
 
 ### 4. Mass Assignment Protection
 

@@ -245,26 +245,6 @@ return [
             'url' => '/admin',
             'icon' => 'fa fa-fw fa-digital-tachograph mr-2',
         ],
-        [
-            'text' => 'Usuários',
-            'url' => '#',
-            'icon' => 'fas fa-fw fa-user mr-2',
-            'can' => 'Acessar Usuários',
-            'submenu' => [
-                [
-                    'text' => 'Listagem de Usuários',
-                    'url' => 'admin/users',
-                    'icon' => 'fas fa-fw fa-chevron-right mr-2',
-                    'can' => 'Listar Usuários',
-                ],
-                [
-                    'text' => 'Cadastro de Usuário',
-                    'url' => 'admin/users/create',
-                    'icon' => 'fas fa-fw fa-chevron-right mr-2',
-                    'can' => 'Criar Usuários',
-                ],
-            ],
-        ],
         /** Pentests */
         [
             'text' => 'Pentests',
@@ -284,8 +264,34 @@ return [
                     'icon' => 'fas fa-fw fa-chevron-right mr-2',
                     'can' => 'Criar Pentests',
                 ],
+                [
+                    'text' => 'Vulnerabilidades',
+                    'url' => 'admin/vulnerabilities',
+                    'icon' => 'fas fa-fw fa-chevron-right mr-2',
+                    'can' => 'Listar Vulnerabilidades',
+                ],
             ],
         ],
+        [
+            'text' => 'Usuários',
+            'url' => '#',
+            'icon' => 'fas fa-fw fa-user mr-2',
+            'can' => 'Acessar Usuários',
+            'submenu' => [
+                [
+                    'text' => 'Listagem de Usuários',
+                    'url' => 'admin/users',
+                    'icon' => 'fas fa-fw fa-chevron-right mr-2',
+                    'can' => 'Listar Usuários',
+                ],
+                [
+                    'text' => 'Cadastro de Usuário',
+                    'url' => 'admin/users/create',
+                    'icon' => 'fas fa-fw fa-chevron-right mr-2',
+                    'can' => 'Criar Usuários',
+                ],
+            ],
+        ],        
         /** ACL */
         [
             'text' => 'ACL',
