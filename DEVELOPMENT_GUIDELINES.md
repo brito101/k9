@@ -107,7 +107,53 @@ Exemplos:
 - **Administrador**: Acesso administrativo (exceto Programador)
 - **Usuário**: Acesso básico
 
-### 5. Verificação nas Views (Blade)
+### 5. Seeders de Permissões
+
+#### ⚠️ REGRA CRÍTICA: Atribuição Automática de Permissões
+
+O sistema possui dois seeders principais:
+
+**PermissionsTableSeeder.php**: Cria as permissões no banco
+```php
+DB::table('permissions')->insert([
+    [
+        'name' => 'Listar Recursos',
+        'guard_name' => 'web',
+        'created_at' => new DateTime('now'),
+    ],
+    // ...
+]);
+```
+
+**RolesHasPermissionTableSeeder.php**: Atribui permissões aos perfis
+
+**IMPORTANTE**: Este seeder é **automático e dinâmico**:
+- Busca TODAS as permissões existentes no banco
+- Atribui automaticamente para os perfis **Programador** e **Administrador**
+- O perfil **Usuário** permanece sem permissões por padrão
+
+```php
+// Busca todas as permissões
+$permissions = Permission::all();
+
+// Atribui para Programador e Administrador
+$programador->syncPermissions($permissions);
+$administrador->syncPermissions($permissions);
+```
+
+**Benefícios desta abordagem**:
+- ✅ Não precisa atualizar manualmente quando criar novas permissões
+- ✅ Garante que Programador e Administrador sempre têm acesso total
+- ✅ Facilita manutenção e evita erros
+- ✅ Basta criar a permissão e rodar `php artisan db:seed --class=RolesHasPermissionTableSeeder`
+
+**Workflow ao adicionar novas funcionalidades**:
+1. Adicione novas permissões no `PermissionsTableSeeder.php`
+2. Execute: `sail artisan db:seed --class=PermissionsTableSeeder`
+3. Execute: `sail artisan db:seed --class=RolesHasPermissionTableSeeder`
+4. Pronto! Programador e Administrador já têm as novas permissões
+
+### 6. Verificação nas Views (Blade)
 
 ```php
 // Botão condicional
@@ -762,6 +808,77 @@ protected $fillable = [
 
 ## 📝 PADRÕES DE CÓDIGO
 
+### 0. Idioma do Código
+
+#### ⚠️ REGRA CRÍTICA: Código em Inglês, Interface em Português
+
+**SEMPRE use inglês para:**
+- ✅ Nomes de variáveis
+- ✅ Nomes de métodos e funções
+- ✅ Nomes de classes
+- ✅ Propriedades de banco de dados (colunas)
+- ✅ Nomes de tabelas
+- ✅ Parâmetros de funções
+- ✅ Atributos `name` em inputs HTML
+- ✅ Chaves de arrays associativos
+- ✅ Comentários no código (preferencialmente)
+
+**SEMPRE use português para:**
+- ✅ Labels de formulários (`<label>`)
+- ✅ Placeholders
+- ✅ Títulos e textos visíveis ao usuário
+- ✅ Mensagens de erro e sucesso
+- ✅ Breadcrumbs
+- ✅ Nomes de permissões no sistema Spatie
+- ✅ Tooltips e hints
+- ✅ Conteúdo do arquivo `resources/lang/pt-br/validation.php`
+
+**Exemplo correto:**
+
+```php
+// Model
+protected $fillable = [
+    'version',        // ✅ Inglês
+    'author',         // ✅ Inglês
+    'start_date',     // ✅ Inglês
+];
+
+// Migration
+Schema::create('pentests', function (Blueprint $table) {
+    $table->string('version', 50);      // ✅ Inglês
+    $table->date('start_date');         // ✅ Inglês
+    $table->string('responsible', 200); // ✅ Inglês
+});
+
+// View (Blade)
+<label for="start_date">Data de Início</label>  // ✅ Label em português
+<input type="date" name="start_date"            // ✅ Name em inglês
+       placeholder="Selecione a data"           // ✅ Placeholder em português
+       id="start_date">
+
+// Request Validation
+public function rules(): array
+{
+    return [
+        'start_date' => 'required|date',  // ✅ Campo em inglês
+    ];
+}
+
+public function attributes(): array
+{
+    return [
+        'start_date' => 'data de início',  // ✅ Tradução em português
+    ];
+}
+```
+
+**Justificativa:**
+- Padrão internacional de desenvolvimento
+- Facilita colaboração com desenvolvedores de outros países
+- Evita problemas com encoding e acentuação
+- Melhora legibilidade do código
+- Separa lógica (inglês) de apresentação (idioma local)
+
 ### 1. Namespaces
 
 - Controllers Admin: `App\Http\Controllers\Admin`
@@ -815,8 +932,9 @@ use App\Models\Recurso;
 ### 1. Cores e Temas
 
 - **Tema padrão**: Dark mode habilitado
-- **Botão Criar/Novo**: `btn-success` (verde)
-- **Botão Editar**: `btn-primary` (azul)
+- **Botão Criar/Novo**: `btn-success` (verde) - usado em listagens para criar novo registro
+- **Botão Salvar/Submit**: `btn-success` (verde) - usado em formulários (create e edit)
+- **Botão Editar**: `btn-primary` (azul) - usado em listagens e visualizações
 - **Botão Excluir**: `btn-danger` (vermelho)
 - **Botão Info/Visualizar**: `btn-info` (ciano)
 - **Botão Secundário**: `btn-secondary` (cinza)
@@ -830,7 +948,7 @@ use App\Models\Recurso;
 - **Visualizar**: `fa-eye`
 - **Sincronizar**: `fa-sync`
 - **Configurações**: `fa-cog`
-- **Salvar**: `fa-save`
+- **Salvar**: `far fa-save` (regular style para melhor aparência)
 
 ### 3. Layout Responsivo
 
@@ -862,6 +980,48 @@ Sempre usar estrutura AdminLTE:
     </div>
 </div>
 ```
+
+### 5. Formulários
+
+#### ⚠️ REGRA CRÍTICA: Botões em Formulários
+
+**NÃO INCLUIR** botões de cancelar ou voltar nos formulários.
+
+❌ **NUNCA faça:**
+```php
+<!-- NÃO FAZER -->
+<button type="button" class="btn btn-secondary" onclick="history.back()">
+    <i class="fas fa-arrow-left"></i> Voltar
+</button>
+<a href="{{ route('admin.recurso.index') }}" class="btn btn-secondary">
+    Cancelar
+</a>
+```
+
+✅ **SEMPRE faça:**
+```php
+<!-- Apenas botão de submit -->
+<button type="submit" class="btn btn-success">
+    <i class="far fa-save"></i> Salvar
+</button>
+```
+
+**Justificativa:**
+- O usuário pode usar o breadcrumb ou navegação lateral para sair da página
+- Reduz poluição visual na interface
+- Evita cliques acidentais que descartam dados não salvos
+- Melhora a experiência do usuário focando na ação principal
+
+**Estrutura padrão do card-footer:**
+```php
+<div class="card-footer">
+    <button type="submit" class="btn btn-success">
+        <i class="far fa-save"></i> Salvar
+    </button>
+</div>
+```
+
+**IMPORTANTE**: O botão sempre tem o texto "Salvar", tanto no **create** quanto no **edit**. Nunca use "Enviar", "Atualizar" ou "Cadastrar". A consistência é essencial para a experiência do usuário.
 
 ---
 
@@ -958,6 +1118,8 @@ npm run dev                         # Modo desenvolvimento
 10. **Não** criar controllers fora do namespace correto
 11. **Não** usar rotas sem o prefix `admin`
 12. **Não** esquecer type hints e return types
+13. **Não** incluir botões de cancelar ou voltar nos formulários
+14. **Não** usar português em nomes de variáveis, métodos, propriedades de banco de dados ou atributos `name` de inputs
 
 ### ✅ SEMPRE FAÇA
 
@@ -973,6 +1135,7 @@ npm run dev                         # Modo desenvolvimento
 10. **Sempre** use `@can` para elementos condicionais
 11. **Sempre** configure plugins necessários no `@section`
 12. **Sempre** use classes de responsividade do Bootstrap
+13. **Sempre** use inglês para código (variáveis, métodos, colunas de banco) e português apenas para interface do usuário
 
 ---
 
@@ -999,7 +1162,13 @@ Este arquivo deve ser atualizado sempre que:
 - Novas dependências importantes forem adicionadas
 - Regras de desenvolvimento forem modificadas
 
-**Data da última atualização**: 06/01/2026
+**Data da última atualização**: 07/01/2026
+
+### Últimas Alterações
+- **07/01/2026**: Padronização dos botões de submit para `btn-success` com ícone e texto "Salvar" em todos os formulários
+- **07/01/2026**: Adicionada regra crítica sobre usar inglês no código e português apenas na interface do usuário
+- **07/01/2026**: Adicionada regra sobre não incluir botões de cancelar ou voltar nos formulários
+- **07/01/2026**: Refatoração do RolesHasPermissionTableSeeder para atribuição automática de permissões aos perfis Programador e Administrador
 
 ---
 

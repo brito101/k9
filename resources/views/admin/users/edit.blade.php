@@ -166,7 +166,9 @@
                             </div>
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">Atualizar</button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="far fa-save"></i> Salvar
+                                </button>
                             </div>
                         </form>
 

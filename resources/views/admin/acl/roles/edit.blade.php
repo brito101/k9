@@ -50,7 +50,9 @@
                             </div>
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">Enviar</button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="far fa-save"></i> Salvar
+                                </button>
                             </div>
                         </form>
 
@@ -59,9 +61,4 @@
             </div>
         </div>
     </section>
-@endsection
-
-@section('adminlte_js')
-    <script src="{{ asset('vendor/jquery/jquery.inputmask.bundle.min.js') }}"></script>
-    <script src="{{ asset('js/company.js') }}"></script>
 @endsection
