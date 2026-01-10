@@ -63,12 +63,12 @@
                                         <dd class="col-sm-9">
                                             @php
                                                 $badges = [
-                                                    'critical' => '<span class="badge badge-danger">CRÍTICA</span>',
-                                                    'high' => '<span class="badge badge-warning">ALTA</span>',
-                                                    'medium' => '<span class="badge badge-info">MÉDIA</span>',
-                                                    'low' => '<span class="badge badge-secondary">BAIXA</span>',
+                                                    'critical' => '<span class="badge" style="background-color: #000000; color: #ffffff;">CRÍTICA</span>',
+                                                    'high' => '<span class="badge" style="background-color: #dc3545; color: #ffffff;">ALTA</span>',
+                                                    'medium' => '<span class="badge" style="background-color: #fd7e14; color: #ffffff;">MÉDIA</span>',
+                                                    'low' => '<span class="badge" style="background-color: #17a2b8; color: #ffffff;">BAIXA</span>',
                                                     'informative' =>
-                                                        '<span class="badge badge-light">INFORMATIVA</span>',
+                                                        '<span class="badge" style="background-color: #28a745; color: #ffffff;">INFORMATIVA</span>',
                                                 ];
                                             @endphp
                                             {!! $badges[$vulnerability->criticality] ?? '-' !!}
