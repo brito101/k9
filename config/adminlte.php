@@ -291,7 +291,7 @@ return [
                     'can' => 'Criar Usuários',
                 ],
             ],
-        ],        
+        ],
         /** ACL */
         [
             'text' => 'ACL',
