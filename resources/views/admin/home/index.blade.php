@@ -176,7 +176,7 @@
 
                 <div class="row px-0">
 
-                    <div class="col-12 col-lg-6">
+                    <div class="col-12">
                         <div class="card">
                             <div class="card-header border-0">
                                 <div class="d-flex justify-content-between">
@@ -209,7 +209,7 @@
                                             <div class=""></div>
                                         </div>
                                     </div>
-                                    <canvas id="visitors-chart" style="display: block; width: 489px; height: 200px;"
+                                    <canvas id="visitors-chart" style="display: block; width: 489px; height: 500px; max-height: 500px;"
                                         class="chartjs-render-monitor" width="489" height="200"></canvas>
                                 </div>
                             </div>

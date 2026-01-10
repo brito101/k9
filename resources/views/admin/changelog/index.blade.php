@@ -2,6 +2,14 @@
 
 @section('title', '- Changelog')
 
+@section('adminlte_css')
+    <style>
+        .dark-mode .callout.callout-info {
+            border-left-color: #007bff ;
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="content-header">
         <div class="container-fluid">
@@ -38,13 +46,25 @@
                         <div class="row">
                             <div class="col-12">
                                 <h4>Versionamento:</h4>
-
                                 <x-adminlte-callout theme="info" class="elevation-2" title-class="text-uppercase"
                                     title="1.0.0">
                                     <ul>
                                         <li>Módulo de ACL com perfis e permissões</li>
                                         <li>Módulo de Usuários</li>
                                         <li>Duplo fator de autenticação (2FA)</li>
+                                        <li>Módulo de Gestão de Pentests</li>
+                                        <li>Sistema de numeração sequencial por ano (Ex: 01/2026, 02/2026)</li>
+                                        <li>Reordenação automática ao excluir pentests</li>
+                                        <li>Campo de prioridade (Baixa, Média, Alta, Urgente)</li>
+                                        <li>Datas de início e prazo opcionais</li>
+                                        <li>Módulo de Gestão de Vulnerabilidades</li>
+                                        <li>Classificação de vulnerabilidades por criticidade</li>
+                                        <li>Dashboard executiva com big numbers e estatísticas</li>
+                                        <li>Gráficos de vulnerabilidades (donut chart)</li>
+                                        <li>Controle de status (Aguardando, Em Andamento, Finalizado, Atrasado)</li>
+                                        <li>Cálculo automático de deadlines e atrasos</li>
+                                        <li>DataTables com ordenação customizada e exportação</li>
+                                        <li>Sistema de busca avançada</li>
                                         <li>Changelog</li>
                                     </ul>
                                 </x-adminlte-callout>
@@ -54,7 +74,7 @@
                     </div>
                     <div class="col-12 col-md-12 col-lg-6 order-1 order-md-2 overflow-auto" style="max-height: 65vh;">
 
-                        <x-adminlte-profile-widget name="{{ env('APP_NAME')}}" desc="{{ env('APP_DES')}}"
+                        <x-adminlte-profile-widget name="{{ env('APP_NAME') }}" desc="{{ env('APP_DES') }}"
                             theme="bg-gradient-dark" img="{{ asset('img/favicon.svg') }}" layout-type="classic">
                             <x-adminlte-profile-row-item
                                 title="Rodrigo Carvalho de Brito, e-mail: contato@rodrigobrito.dev.br"
@@ -67,10 +87,6 @@
                                 size=4 />
                             <x-adminlte-profile-col-item title="Laravel" icon="fab fa-2x fa-laravel text-primary" size=4 />
                         </x-adminlte-profile-widget>
-
-                        <p class="text-muted">
-                            Sistema base em Laravel 10
-                        </p>
                     </div>
                 </div>
             </div>
