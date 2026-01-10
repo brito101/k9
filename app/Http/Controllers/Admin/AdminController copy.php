@@ -173,10 +173,10 @@ class AdminController extends Controller
         $resolvedPercent = $totalVulnerabilities > 0 ? round(($resolved / $totalVulnerabilities) * 100, 1) : 0;
 
         // Prioridades dos pentests do ano
-        // $urgent = $pentestsThisYear->where('priority', 'urgent')->count();
-        // $highPriority = $pentestsThisYear->where('priority', 'high')->count();
-        // $mediumPriority = $pentestsThisYear->where('priority', 'medium')->count();
-        // $lowPriority = $pentestsThisYear->where('priority', 'low')->count();
+        $urgent = $pentestsThisYear->where('priority', 'urgent')->count();
+        $highPriority = $pentestsThisYear->where('priority', 'high')->count();
+        $mediumPriority = $pentestsThisYear->where('priority', 'medium')->count();
+        $lowPriority = $pentestsThisYear->where('priority', 'low')->count();
 
         return [
             'currentYear' => $currentYear,
@@ -203,10 +203,10 @@ class AdminController extends Controller
             'resolved' => $resolved,
             'resolvedPercent' => $resolvedPercent,
             'unresolved' => $unresolved,
-            // 'urgent' => $urgent,
-            // 'highPriority' => $highPriority,
-            // 'mediumPriority' => $mediumPriority,
-            // 'lowPriority' => $lowPriority,
+            'urgent' => $urgent,
+            'highPriority' => $highPriority,
+            'mediumPriority' => $mediumPriority,
+            'lowPriority' => $lowPriority,
         ];
     }
 }
