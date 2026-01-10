@@ -15,8 +15,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard</li>
+                        <li class="breadcrumb-item active">Home</li>
                     </ol>
                 </div>
             </div>
@@ -24,19 +23,66 @@
     </div>
     <section class="content">
         <div class="container-fluid">
+
+            {{-- Big Numbers Pentests 2026 --}}
             <div class="row">
-                @if (Auth::user()->hasRole('Programador|Administrador'))
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="info-box mb-3">
-                            <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-user-shield"></i></span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Administradores</span>
-                                <span class="info-box-number">{{ $administrators }}</span>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-shield-alt"></i> Pentests
+                                {{ $pentestStats['currentYear'] }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <div class="small-box bg-info">
+                                        <div class="inner">
+                                            <h3>{{ $pentestStats['totalPentestsYear'] }}</h3>
+                                            <p>Total de Pentests</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <div class="small-box bg-success">
+                                        <div class="inner">
+                                            <h3>{{ $pentestStats['finalizedPercent'] }} %</h3>
+                                            <p>Finalizados</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <div class="small-box bg-warning">
+                                        <div class="inner">
+                                            <h3>{{ $pentestStats['totalVulnerabilities'] }}</h3>
+                                            <p>Total de Vulnerabilidades</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="fas fa-bug"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <div class="small-box bg-danger">
+                                        <div class="inner">
+                                            <h3>{{ $pentestStats['unresolved'] }}
+                                                <small>({{ 100 - $pentestStats['resolvedPercent'] }}%)</small></span></h3>
+                                            <p>Não Sanadas</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                @endif
-
+                </div>
             </div>
 
             @if (Auth::user()->hasRole('Programador|Administrador'))
@@ -48,10 +94,30 @@
                     </div>
 
                     @php
-                        $heads = [['label' => 'Hora', 'width' => 10], 'Página', 'IP', 'User-Agent', 'Plataforma', 'Navegador', 'Usuário', 'Método', 'Requisição'];
+                        $heads = [
+                            ['label' => 'Hora', 'width' => 10],
+                            'Página',
+                            'IP',
+                            'User-Agent',
+                            'Plataforma',
+                            'Navegador',
+                            'Usuário',
+                            'Método',
+                            'Requisição',
+                        ];
                         $config = [
                             'ajax' => url('/admin'),
-                            'columns' => [['data' => 'time', 'name' => 'time'], ['data' => 'url', 'name' => 'url'], ['data' => 'ip', 'name' => 'ip'], ['data' => 'useragent', 'name' => 'useragent'], ['data' => 'platform', 'name' => 'platform'], ['data' => 'browser', 'name' => 'browser'], ['data' => 'name', 'name' => 'name'], ['data' => 'method', 'name' => 'method'], ['data' => 'request', 'name' => 'request']],
+                            'columns' => [
+                                ['data' => 'time', 'name' => 'time'],
+                                ['data' => 'url', 'name' => 'url'],
+                                ['data' => 'ip', 'name' => 'ip'],
+                                ['data' => 'useragent', 'name' => 'useragent'],
+                                ['data' => 'platform', 'name' => 'platform'],
+                                ['data' => 'browser', 'name' => 'browser'],
+                                ['data' => 'name', 'name' => 'name'],
+                                ['data' => 'method', 'name' => 'method'],
+                                ['data' => 'request', 'name' => 'request'],
+                            ],
                             'language' => ['url' => asset('vendor/datatables/js/pt-BR.json')],
                             'order' => [0, 'desc'],
                             'destroy' => true,
@@ -63,21 +129,50 @@
                             'dom' => '<"d-flex flex-wrap col-12 justify-content-between"Bf>rtip',
                             'buttons' => [
                                 ['extend' => 'pageLength', 'className' => 'btn-default'],
-                                ['extend' => 'copy', 'className' => 'btn-default', 'text' => '<i class="fas fa-fw fa-lg fa-copy text-secondary"></i>', 'titleAttr' => 'Copiar', 'exportOptions' => ['columns' => ':not([dt-no-export])']],
-                                ['extend' => 'print', 'className' => 'btn-default', 'text' => '<i class="fas fa-fw fa-lg fa-print text-info"></i>', 'titleAttr' => 'Imprimir', 'exportOptions' => ['columns' => ':not([dt-no-export])']],
-                                ['extend' => 'csv', 'className' => 'btn-default', 'text' => '<i class="fas fa-fw fa-lg fa-file-csv text-primary"></i>', 'titleAttr' => 'Exportar para CSV', 'exportOptions' => ['columns' => ':not([dt-no-export])']],
-                                ['extend' => 'excel', 'className' => 'btn-default', 'text' => '<i class="fas fa-fw fa-lg fa-file-excel text-success"></i>', 'titleAttr' => 'Exportar para Excel', 'exportOptions' => ['columns' => ':not([dt-no-export])']],
-                                ['extend' => 'pdf', 'className' => 'btn-default', 'text' => '<i class="fas fa-fw fa-lg fa-file-pdf text-danger"></i>', 'titleAttr' => 'Exportar para PDF', 'exportOptions' => ['columns' => ':not([dt-no-export])']],
+                                [
+                                    'extend' => 'copy',
+                                    'className' => 'btn-default',
+                                    'text' => '<i class="fas fa-fw fa-lg fa-copy text-secondary"></i>',
+                                    'titleAttr' => 'Copiar',
+                                    'exportOptions' => ['columns' => ':not([dt-no-export])'],
+                                ],
+                                [
+                                    'extend' => 'print',
+                                    'className' => 'btn-default',
+                                    'text' => '<i class="fas fa-fw fa-lg fa-print text-info"></i>',
+                                    'titleAttr' => 'Imprimir',
+                                    'exportOptions' => ['columns' => ':not([dt-no-export])'],
+                                ],
+                                [
+                                    'extend' => 'csv',
+                                    'className' => 'btn-default',
+                                    'text' => '<i class="fas fa-fw fa-lg fa-file-csv text-primary"></i>',
+                                    'titleAttr' => 'Exportar para CSV',
+                                    'exportOptions' => ['columns' => ':not([dt-no-export])'],
+                                ],
+                                [
+                                    'extend' => 'excel',
+                                    'className' => 'btn-default',
+                                    'text' => '<i class="fas fa-fw fa-lg fa-file-excel text-success"></i>',
+                                    'titleAttr' => 'Exportar para Excel',
+                                    'exportOptions' => ['columns' => ':not([dt-no-export])'],
+                                ],
+                                [
+                                    'extend' => 'pdf',
+                                    'className' => 'btn-default',
+                                    'text' => '<i class="fas fa-fw fa-lg fa-file-pdf text-danger"></i>',
+                                    'titleAttr' => 'Exportar para PDF',
+                                    'exportOptions' => ['columns' => ':not([dt-no-export])'],
+                                ],
                             ],
                         ];
                     @endphp
 
                     <div class="card-body">
                         <x-adminlte-datatable id="table1" :heads="$heads" :heads="$heads" :config="$config" striped
-                            hoverable beautify theme="dark"/>
+                            hoverable beautify theme="dark" />
                     </div>
                 </div>
-
 
                 <div class="row px-0">
 
