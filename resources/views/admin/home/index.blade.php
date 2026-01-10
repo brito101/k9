@@ -29,7 +29,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-shield-alt"></i> Pentests
+                            <h3 class="card-title"><i class="fas fa-shield-alt mr-2"></i> Pentests
                                 {{ $pentestStats['currentYear'] }}</h3>
                         </div>
                         <div class="card-body">
@@ -155,7 +155,9 @@
                                             <h3 class="card-title">Status dos Pentests</h3>
                                         </div>
                                         <div class="card-body">
-                                            <canvas id="chartPentestStatus" style="max-height: 300px;"></canvas>
+                                            <div style="position: relative; height: 300px;">
+                                                <canvas id="chartPentestStatus"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -165,6 +167,145 @@
                     </div>
                 </div>
             </div>
+
+            @if (!empty($globalStats['years']))
+                {{-- Dados Globais - Visão Geral --}}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-globe mr-2"></i> Visão Geral - Todos os Anos</h3>
+                            </div>
+                            <div class="card-body">
+                                {{-- Gráfico de Evolução e Métricas --}}
+                                <div class="row align-items-stretch">
+                                    <div class="col-12 col-lg-8 d-flex">
+                                        <div class="card flex-fill">
+                                            <div class="card-header">
+                                                <h3 class="card-title">Evolução Temporal
+                                                </h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <canvas id="chartEvolution" style="height: 300px;"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-lg-4 d-flex">
+                                        <div class="card flex-fill">
+                                            <div class="card-header">
+                                                <h3 class="card-title">Métricas Globais</h3>
+                                            </div>
+                                            <div class="card-body">
+
+                                                <div class="info-box mb-3 bg-light">
+                                                    <span class="info-box-icon bg-primary"><i
+                                                            class="fas fa-shield-alt"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Total de Pentests</span>
+                                                        <span
+                                                            class="info-box-number">{{ $globalStats['totalPentests'] }}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="info-box mb-3 bg-light">
+                                                    <span class="info-box-icon bg-warning"><i
+                                                            class="fas fa-bug"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Total de Vulnerabilidades</span>
+                                                        <span
+                                                            class="info-box-number">{{ $globalStats['totalVulnerabilities'] }}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="info-box mb-3 bg-light">
+                                                    <span class="info-box-icon bg-success"><i
+                                                            class="fas fa-calculator"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Média Vulnerab./Pentest</span>
+                                                        <span
+                                                            class="info-box-number">{{ $globalStats['avgVulnPerPentest'] }}</span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Gráfico de Barras Agrupadas --}}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="card-title">Performance Anual: Totais vs Finalizados</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <canvas id="chartPerformance" style="height: 300px;"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Cards Comparativos por Ano --}}
+                                <div class="row justify-content-center">
+                                    @foreach ($globalStats['years'] as $index => $year)
+                                        <div class="col-12 col-md-4 col-xl-3">
+                                            <div class="card">
+                                                <div class="card-header bg-primary">
+                                                    <h3 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>
+                                                        {{ $year }}
+                                                    </h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="description-block">
+                                                                <h5 class="description-header">
+                                                                    {{ $globalStats['yearlyData'][$year]['pentests'] }}
+                                                                </h5>
+                                                                <span class="description-text">Pentests</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="description-block">
+                                                                <h5 class="description-header">
+                                                                    {{ $globalStats['yearlyData'][$year]['finalized'] }}
+                                                                </h5>
+                                                                <span class="description-text">Finalizados</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="description-block">
+                                                                <h5 class="description-header text-warning">
+                                                                    {{ $globalStats['yearlyData'][$year]['vulnerabilities'] }}
+                                                                </h5>
+                                                                <span class="description-text">Vulnerabilidades</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="description-block">
+                                                                <h5 class="description-header text-success">
+                                                                    {{ $globalStats['yearlyData'][$year]['resolvedPercent'] }}%
+                                                                </h5>
+                                                                <span class="description-text">Resolvidas</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            @endif
 
             @if (Auth::user()->hasRole('Programador|Administrador'))
                 <div class="card">
@@ -307,6 +448,131 @@
 @endsection
 
 @section('custom_js')
+    @if (!empty($globalStats['years']))
+        <script>
+            // Gráfico de Linha - Evolução Temporal
+            const ctxEvolution = document.getElementById('chartEvolution');
+            if (ctxEvolution) {
+                const yearlyData = @json($globalStats['yearlyData']);
+                const years = @json($globalStats['years']);
+
+                const pentestsData = years.map(year => yearlyData[year].pentests);
+                const vulnerabilitiesData = years.map(year => yearlyData[year].vulnerabilities);
+
+                new Chart(ctxEvolution, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Pentests',
+                            data: pentestsData,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            fill: true,
+                            yAxisID: 'y-axis-1',
+                        }, {
+                            label: 'Vulnerabilidades',
+                            data: vulnerabilitiesData,
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                            fill: true,
+                            yAxisID: 'y-axis-2',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            labels: {
+                                fontColor: "#ffffff",
+                                fontSize: 12
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                id: 'y-axis-1',
+                                type: 'linear',
+                                position: 'left',
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: "#ffffff"
+                                }
+                            }, {
+                                id: 'y-axis-2',
+                                type: 'linear',
+                                position: 'right',
+                                gridLines: {
+                                    drawOnChartArea: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    fontColor: "#ffffff"
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: "#ffffff"
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            // Gráfico de Barras Agrupadas - Performance Anual
+            const ctxPerformance = document.getElementById('chartPerformance');
+            if (ctxPerformance) {
+                const yearlyData = @json($globalStats['yearlyData']);
+                const years = @json($globalStats['years']);
+
+                const pentestsTotais = years.map(year => yearlyData[year].pentests);
+                const pentestsFinalizados = years.map(year => yearlyData[year].finalized);
+
+                new Chart(ctxPerformance, {
+                    type: 'bar',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Pentests Totais',
+                            data: pentestsTotais,
+                            backgroundColor: '#17a2b8',
+                            borderWidth: 1
+                        }, {
+                            label: 'Pentests Finalizados',
+                            data: pentestsFinalizados,
+                            backgroundColor: '#28a745',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            labels: {
+                                fontColor: "#ffffff",
+                                fontSize: 12
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    stepSize: 5,
+                                    fontColor: "#ffffff"
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontColor: "#ffffff"
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+        </script>
+    @endif
+
     <script>
         // Gráfico de Rosca - Vulnerabilidades por Criticidade
         const ctxVulnerabilities = document.getElementById('chartVulnerabilitiesByCriticality');
@@ -339,6 +605,10 @@
                     maintainAspectRatio: false,
                     legend: {
                         position: 'bottom',
+                        labels: {
+                            fontColor: "#ffffff",
+                            fontSize: 12
+                        }
                     },
                     tooltips: {
                         callbacks: {
@@ -383,7 +653,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     legend: {
                         display: false
                     },
@@ -391,7 +661,13 @@
                         yAxes: [{
                             ticks: {
                                 beginAtZero: true,
-                                stepSize: 1
+                                stepSize: 1,
+                                fontColor: "#ffffff"
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontColor: "#ffffff"
                             }
                         }]
                     },

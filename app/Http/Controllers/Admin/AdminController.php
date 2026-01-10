@@ -48,12 +48,16 @@ class AdminController extends Controller
         /** Pentest Statistics */
         $pentestStats = $this->pentestStatistics();
 
+        /** Global Statistics */
+        $globalStats = $this->globalStatistics();
+
         return view('admin.home.index', compact(
             'onlineUsers',
             'percent',
             'access',
             'chart',
             'pentestStats',
+            'globalStats',
         ));
     }
 
@@ -207,6 +211,84 @@ class AdminController extends Controller
             // 'highPriority' => $highPriority,
             // 'mediumPriority' => $mediumPriority,
             // 'lowPriority' => $lowPriority,
+        ];
+    }
+
+    private function globalStatistics(): array
+    {
+        // Obter todos os anos com pentests existentes, ordenados
+        $years = Pentest::select('year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->toArray();
+
+        // Se não houver dados, retornar vazio
+        if (empty($years)) {
+            return [
+                'years' => [],
+                'yearlyData' => [],
+                'currentYearGrowth' => 0,
+                'currentYearVulnGrowth' => 0,
+                'avgVulnPerPentest' => 0,
+            ];
+        }
+
+        $yearlyData = [];
+        $totalPentests = 0;
+        $totalVulns = 0;
+
+        foreach ($years as $year) {
+            $pentests = Pentest::where('year', $year)->get();
+            $pentestIds = $pentests->pluck('id');
+            $vulnerabilities = Vulnerability::whereIn('pentest_id', $pentestIds)->get();
+
+            $total = $pentests->count();
+            $finalized = $pentests->whereNotNull('completion_date')->count();
+            $totalVulnerabilities = $vulnerabilities->count();
+            $resolved = $vulnerabilities->whereNotNull('resolved_at')->count();
+            $resolvedPercent = $totalVulnerabilities > 0 ? round(($resolved / $totalVulnerabilities) * 100, 1) : 0;
+
+            $yearlyData[$year] = [
+                'pentests' => $total,
+                'finalized' => $finalized,
+                'vulnerabilities' => $totalVulnerabilities,
+                'resolved' => $resolved,
+                'resolvedPercent' => $resolvedPercent,
+            ];
+
+            $totalPentests += $total;
+            $totalVulns += $totalVulnerabilities;
+        }
+
+        // Calcular taxas de crescimento do ano atual vs anterior
+        $currentYear = date('Y');
+        $previousYear = $currentYear - 1;
+
+        $currentYearGrowth = 0;
+        $currentYearVulnGrowth = 0;
+
+        if (isset($yearlyData[$previousYear]) && isset($yearlyData[$currentYear])) {
+            if ($yearlyData[$previousYear]['pentests'] > 0) {
+                $currentYearGrowth = round((($yearlyData[$currentYear]['pentests'] - $yearlyData[$previousYear]['pentests']) / $yearlyData[$previousYear]['pentests']) * 100, 1);
+            }
+
+            if ($yearlyData[$previousYear]['vulnerabilities'] > 0) {
+                $currentYearVulnGrowth = round((($yearlyData[$currentYear]['vulnerabilities'] - $yearlyData[$previousYear]['vulnerabilities']) / $yearlyData[$previousYear]['vulnerabilities']) * 100, 1);
+            }
+        }
+
+        // Média de vulnerabilidades por pentest
+        $avgVulnPerPentest = $totalPentests > 0 ? round($totalVulns / $totalPentests, 1) : 0;
+
+        return [
+            'years' => $years,
+            'yearlyData' => $yearlyData,
+            'currentYearGrowth' => $currentYearGrowth,
+            'currentYearVulnGrowth' => $currentYearVulnGrowth,
+            'totalPentests' => $totalPentests,
+            'totalVulnerabilities' => $totalVulns,
+            'avgVulnPerPentest' => $avgVulnPerPentest,
         ];
     }
 }
