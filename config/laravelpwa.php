@@ -4,10 +4,10 @@ return [
     'name' => 'LaravelPWA',
     'manifest' => [
         'name' => env('APP_NAME', 'My PWA App'),
-        'short_name' => 'PWA',
+        'short_name' => 'K9',
         'start_url' => '/',
-        'background_color' => '#ffffff',
-        'theme_color' => '#000000',
+        'background_color' => '#343a40',
+        'theme_color' => '#dc3545',
         'display' => 'standalone',
         'orientation' => 'any',
         'status_bar' => 'black',

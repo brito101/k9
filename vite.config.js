@@ -9,11 +9,13 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/sass/app.scss',
+                'resources/sass/login.scss',
 
                 'resources/js/company.js',
                 'resources/js/address.js',
                 'resources/js/phone.js',
                 'resources/js/google2fa.js',
+                'resources/js/particles.js',
             ],
             refresh: true,
         }),

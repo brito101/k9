@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pentest;
 use App\Models\User;
-use App\Models\Views\User as ViewsUser;
 use App\Models\Views\Visit;
 use App\Models\Views\VisitYesterday;
 use App\Models\Vulnerability;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use stdClass;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -143,7 +141,7 @@ class AdminController extends Controller
         $inProgress = $pentestsThisYear->whereNull('completion_date')->whereNotNull('start_date')->count();
         $pending = $pentestsThisYear->whereNull('start_date')->count();
         $delayed = $pentestsThisYear->filter(function ($p) {
-            return !$p->completion_date && $p->deadline && $p->deadline < now();
+            return ! $p->completion_date && $p->deadline && $p->deadline < now();
         })->count();
 
         // Percentuais de status

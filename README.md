@@ -1,81 +1,105 @@
-# 🚀 Base Laravel - Professional Template
+<div align="center">
+  <img src="public/images/k9.png" alt="K9 Logo" width="200"/>
+  
+  # K9
+  ### Plataforma de gestão de pentests para Red Teams
+</div>
 
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://php.net)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Laravel 12ase template** for rapid development of robust administrative systems with focus on security, scalability and user experience.
+> **Sistema profissional de gestão de pentests e vulnerabilidades** desenvolvido para equipes Red Team, com foco em organização, rastreabilidade e controle de testes de penetração.
 
-## 📋 Table of Contents
+## 📋 Índice
 
-- [About the Project](#-about-the-project)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Installation](#-installation)
-- [Configuration](#-configuration)
-- [Usage](#-usage)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Funcionalidades](#-funcionalidades)
+- [Stack Tecnológica](#-stack-tecnológica)
+- [Arquitetura](#-arquitetura)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Uso](#-uso)
 - [API](#-api)
-- [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Contribuindo](#-contribuindo)
+- [Licença](#-licença)
 
-## 🎯 About the Project
+## 🎯 Sobre o Projeto
 
-This is a **Laravel 12mplate** developed to accelerate the development of robust administrative systems. The project incorporates best practices in development, security and architecture, being ideal for projects that require:
+**K9** é uma plataforma completa de gerenciamento de pentests e vulnerabilidades, desenvolvida especificamente para equipes Red Team e profissionais de segurança ofensiva. O sistema permite:
 
-- **Advanced authentication system** with 2FA
-- **Granular access control** (ACL)
-- **Modern administrative interface**
-- **Secure RESTful APIs**
-- **Monitoring and analytics**
-- **PWA (Progressive Web App)**
+- **Gestão completa de pentests** com controle de prazos e responsáveis
+- **Rastreamento de vulnerabilidades** por criticidade e status
+- **Documentação estruturada** de descobertas e evidências
+- **Controle granular de acesso** (ACL)
+- **Relatórios profissionais** para apresentação aos clientes
+- **APIs seguras** para integração com outras ferramentas
 
-## ✨ Features
+## ✨ Funcionalidades
 
-### 🔐 Security
-- **Multi-factor Authentication** (Google 2FA)
-- **Permission System** (Spatie Laravel Permission)
-- **JWT Authentication** for APIs
-- **Laravel Sanctum** for SPA
-- **Soft Deletes** in all models
-- **Robust data validation**
+### 🎯 Gestão de Pentests
+- **Cadastro completo de pentests** com informações detalhadas
+- **Controle de prazos** (data início, finalização e deadline)
+- **Priorização** (Urgente, Alta, Média, Baixa)
+- **Status automático** (Aguardando Início, Em Andamento, Finalizado, Atrasado)
+- **Atribuição de responsáveis**
+- **Versionamento** de aplicações testadas
+
+### 🐛 Gestão de Vulnerabilidades
+- **Classificação por criticidade** (Crítica, Alta, Média, Baixa, Informativa)
+- **Rastreamento de status** (Sanada, Não Sanada)
+- **Documentação técnica** completa
+- **Evidências e observações**
+- **Vinculação com pentests**
+- **Ordenação inteligente** nas listagens
+
+### 🔐 Segurança
+- **Autenticação robusta** com Laravel Sanctum
+- **Sistema de permissões** (Spatie Laravel Permission)
+- **JWT Authentication** para APIs
+- **Controle de acesso granular**
+- **Auditoria de ações**
+- **Soft Deletes** em todos os modelos
 
 ### 🎨 Interface
-- **AdminLTE 3** - Modern administrative interface
-- **Bootstrap 5** - Responsive CSS framework
-- **DataTables Server-side** - Optimized tables
-- **PWA Ready** - Progressive Web App
+- **AdminLTE 3** - Interface administrativa moderna
+- **Bootstrap 5** - Framework CSS responsivo
+- **DataTables Server-side** - Tabelas otimizadas com ordenação avançada
+- **Design intuitivo** focado em produtividade
+- **Tema dark** para longas jornadas de trabalho
 
-### 📊 Monitoring
-- **Laravel Debugbar** - Development debugging
-- **Visitor Tracking** - Visitor analytics
-- **Changelog System** - Change logging
-- **Error Tracking** - Error monitoring
+### 📊 Relatórios e Métricas
+- **Dashboard com estatísticas** de pentests e vulnerabilidades
+- **Gráficos de criticidade** das vulnerabilidades
+- **Indicadores de progresso** e prazos
+- **Exportação** em múltiplos formatos (PDF, Excel, CSV)
+- **Visão consolidada** por projeto
 
 ### 🚀 Performance
-- **Laravel Vite** - Optimized build tool
-- **Asset Minification** - Resource optimization
-- **Redis Cache** - High-performance cache
-- **Meilisearch** - Fast search
+- **Laravel Vite** - Build tool otimizado
+- **Minificação de assets** - Otimização de recursos
+- **Redis Cache** - Cache de alta performance
+- **Query optimization** - Consultas otimizadas ao banco
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Tecnológica
 
 ### Backend
-- **Laravel 12** - PHP framework
-- **PHP 8.2ogramming language
-- **MySQL 8** - Database
-- **Redis** - Cache and sessions
-- **Docker** - Containerization
+- **Laravel 12** - Framework PHP
+- **PHP 8.2+** - Linguagem de programação
+- **MySQL 8** - Banco de dados
+- **Redis** - Cache e sessões
+- **Docker/Sail** - Containerização
 
 ### Frontend
-- **Bootstrap 5** - CSS framework
-- **AdminLTE 3** - Administrative template
+- **Bootstrap 5** - Framework CSS
+- **AdminLTE 3** - Template administrativo
 - **Vite** - Build tool
-- **SASS** - CSS preprocessor
+- **DataTables** - Tabelas avançadas
+- **SASS** - Pré-processador CSS
 
-### Development Tools
+### Ferramentas de Desenvolvimento
 - **Laravel Sail** - Docker environment
 - **Laravel Pint** - Code style fixer
 - **PEST** - Testing framework
@@ -103,155 +127,176 @@ This is a **Laravel 12mplate** developed to accelerate the development of robust
     └── seeders/            # Seeders
 ```
 
-## 🚀 Installation
+## 🚀 Instalação
 
-### Prerequisites
-- **Docker** and **Docker Compose**
-- **Node.js** 18+ (for local development)
-- **Composer** (for local development)
+### Pré-requisitos
+- **Docker** e **Docker Compose**
+- **Node.js** 18+ (para desenvolvimento local)
+- **Composer** (para desenvolvimento local)
 
-### Step by Step
+### Passo a Passo
 
-1. **Clone the repository**
+1. **Clone o repositório**
 ```bash
 git clone <repository-url>
-cd base-laravel
+cd pentest
 ```
 
-2re the environment**
+2. **Prepare o ambiente**
 ```bash
 cp .env.example .env
 ```
 
-3. **Configure environment variables**
+3. **Configure as variáveis de ambiente**
 ```bash
-# Edit the .env file with your settings
+# Edite o arquivo .env com suas configurações
 nano .env
 ```
 
-4. **Install dependencies**
+4. **Instale as dependências**
 ```bash
 composer install
 npm install
 ```
 
-5*Configure Laravel**
+5. **Configure o Laravel**
 ```bash
 php artisan key:generate
 php artisan jwt:secret
 ```
 
-6. **Configure Docker (optional)**
+6. **Configure o Docker (opcional)**
 ```bash
-# Alias for Laravel Sail
-alias sail=[ -f sail ] && sh sail || sh vendor/bin/sail'
+# Alias para Laravel Sail
+alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
 ```
 
-7. **Run migrations**
+7. **Execute as migrations**
 ```bash
-# With Docker
+# Com Docker
 sail artisan migrate --seed
 
-# Without Docker
+# Sem Docker
 php artisan migrate --seed
 ```
 
-8. **Configure storage**
+8. **Configure o storage**
 ```bash
-# With Docker
+# Com Docker
 sail artisan storage:link
 
-# Without Docker
+# Sem Docker
 php artisan storage:link
 ```
 
-9. **Compile assets**
+9. **Compile os assets**
 ```bash
-# Development
+# Desenvolvimento
 npm run dev
 
-# Production
+# Produção
 npm run build
 ```
 
-## ⚙️ Configuration
+## ⚙️ Configuração
 
-### Important Environment Variables
+### Variáveis de Ambiente Importantes
 
 ```env
 # Application
-APP_NAME=Base Laravel"
+APP_NAME="K9"
+APP_DES="Plataforma de gestão de pentests para Red Teams"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost
 
 # Database
 DB_CONNECTION=mysql
-DB_HOST=127.000.1
-DB_PORT=3306DB_DATABASE=base_laravel
-DB_USERNAME=root
-DB_PASSWORD=
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=pentest
+DB_USERNAME=pentest
+DB_PASSWORD=pentest
 
 # JWT
 JWT_SECRET=your-jwt-secret
 JWT_TTL=60
 
 # Redis
-REDIS_HOST=127.0.00.1EDIS_PASSWORD=null
-REDIS_PORT=6379`
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+```
 
 ### Docker Compose
 
-The project includes complete Docker configuration with:
+O projeto inclui configuração completa do Docker com:
 
-- **Laravel Sail** - Main container
-- **MySQL 8** - Database
-- **Redis** - Cache and sessions
-- **Meilisearch** - Search
-- **Mailpit** - Email testing
-- **Selenium** - Automated tests
+- **Laravel Sail** - Container principal
+- **MySQL 8** - Banco de dados
+- **Redis** - Cache e sessões
+- **Mailpit** - Teste de e-mails
 
-## 🎮 Usage
+## 🎮 Uso
 
-### System Access
+### Acesso ao Sistema
 
-**Default credentials:**
+**Credenciais padrão:**
 - **Email:** programador@base.com
-- **Password:** 12345678## Useful Commands
+- **Password:** 12345678
+
+### Comandos Úteis
 
 ```bash
-# Development
-sail up -d                    # Start containers
-sail artisan serve            # Development server
-npm run dev                   # Compile assets (dev)
+# Desenvolvimento
+sail up -d                    # Iniciar containers
+sail artisan serve            # Servidor de desenvolvimento
+npm run dev                   # Compilar assets (dev)
 
-# Production
-npm run build                 # Compile assets (prod)
-php artisan config:cache      # Configuration cache
-php artisan route:cache       # Route cache
+# Produção
+npm run build                 # Compilar assets (prod)
+php artisan config:cache      # Cache de configuração
+php artisan route:cache       # Cache de rotas
 
-# Maintenance
-sail artisan migrate          # Run migrations
-sail artisan db:seed          # Run seeders
-sail artisan storage:link     # Storage symbolic link
+# Manutenção
+sail artisan migrate          # Executar migrations
+sail artisan db:seed          # Executar seeders
+sail artisan storage:link     # Link simbólico do storage
+sail bin pint                 # Corrigir code style
 ```
+
+### Módulos Principais
+
+#### Pentests
+- **Listagem:** `/admin/pentests` - Lista todos os pentests com filtros e ordenação
+- **Cadastro:** `/admin/pentests/create` - Criar novo pentest
+- **Visualização:** `/admin/pentests/{id}` - Ver detalhes e estatísticas
+- **Edição:** `/admin/pentests/{id}/edit` - Editar pentest existente
+
+#### Vulnerabilidades
+- **Listagem:** `/admin/vulnerabilities` - Lista todas as vulnerabilidades
+- **Cadastro:** Através do botão no pentest específico
+- **Visualização:** `/admin/vulnerabilities/{id}` - Ver detalhes completos
+- **Edição:** `/admin/vulnerabilities/{id}/edit` - Editar vulnerabilidade
 
 ## 🔌 API
 
-### JWT Authentication
+### Autenticação JWT
 
 ```bash
 # Login
 POST /api/v1/login
 {
- email":user@example.com,password: ord"
+  "email": "user@example.com",
+  "password": "password"
 }
 
-# Register
-POST /api/v1gister
+# Registro
+POST /api/v1/register
 {
-    name": User Name",
- email":user@example.com,password: word"
+  "name": "User Name",
+  "email": "user@example.com",
+  "password": "password"
 }
 
 # Refresh Token
@@ -259,59 +304,84 @@ POST /api/v1/refresh
 Authorization: Bearer {token}
 ```
 
-### Available Endpoints
+### Endpoints Disponíveis
 
-- `GET /api/v1/admin/users` - List users
-- `GET /api/v1in/profile` - User profile
-- `POST /api/v1logout` - Logout
+- `GET /api/v1/admin/pentests` - Listar pentests
+- `GET /api/v1/admin/pentests/{id}` - Detalhes do pentest
+- `GET /api/v1/admin/vulnerabilities` - Listar vulnerabilidades
+- `GET /api/v1/admin/profile` - Perfil do usuário
+- `POST /api/v1/logout` - Logout
 
-## 📁 Project Structure
+## 📁 Estrutura do Projeto
 
-### Main Directories
+### Diretórios Principais
 
 ```
 ├── app/
 │   ├── Http/Controllers/
-│   │   ├── Admin/           # Administrative controllers
-│   │   │   └── ACL/         # Access control
+│   │   ├── Admin/           # Controllers administrativos
+│   │   │   ├── PentestController.php
+│   │   │   ├── VulnerabilityController.php
+│   │   │   └── ACL/         # Controle de acesso
 │   │   ├── Api/             # REST APIs
-│   │   └── Auth/            # Authentication
-│   ├── Models/              # Eloquent models
+│   │   └── Auth/            # Autenticação
+│   ├── Models/              # Models Eloquent
+│   │   ├── Pentest.php
+│   │   ├── Vulnerability.php
+│   │   └── User.php
+│   ├── Helpers/             # Helpers customizados
+│   │   ├── CheckPermission.php
+│   │   └── TextProcessor.php
 │   └── Providers/           # Service providers
 ├── resources/
 │   ├── views/
-│   │   ├── admin/           # Administrative views
-│   │   ├── auth/            # Authentication views
-│   │   └── layouts/         # Base layouts
+│   │   ├── admin/           # Views administrativas
+│   │   │   ├── pentests/
+│   │   │   └── vulnerabilities/
+│   │   ├── auth/            # Views de autenticação
+│   │   └── layouts/         # Layouts base
 │   ├── js/                  # JavaScript
-│   └── sass/                # SASS styles
+│   └── sass/                # Estilos SASS
 ├── routes/
-│   ├── web.php              # Web routes
-│   └── api.php              # API routes
+│   ├── web.php              # Rotas web
+│   └── api.php              # Rotas da API
 └── database/
     ├── migrations/           # Migrations
     └── seeders/             # Seeders
 ```
 
-## 🤝 Contributing
+## 🤝 Contribuindo
 
-### Code Standards
+### Padrões de Código
 
-- **PSR-12HP** coding standard
-- **Laravel Pint** - Code style fixer
-- **PEST** - Testing framework
-- **Conventional Commits** - Commit standard
+- **PSR-12** - Padrão de codificação PHP
+- **Laravel Pint** - Corretor de estilo de código
+- **PEST** - Framework de testes
+- **Conventional Commits** - Padrão de commits
 
-## 📄 License
+### Workflow
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'feat: Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-## 🙏 Acknowledgments
+## 📄 Licença
 
-- [Laravel](https://laravel.com) - PHP framework
-- [AdminLTE](https://adminlte.io) - Administrative template
--Spatie](https://spatie.be) - Laravel packages
+Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 🙏 Agradecimentos
+
+- [Laravel](https://laravel.com) - Framework PHP
+- [AdminLTE](https://adminlte.io) - Template administrativo
+- [Spatie](https://spatie.be) - Pacotes Laravel
+- [Yajra DataTables](https://github.com/yajra/laravel-datatables) - DataTables para Laravel
 
 ---
 
-**Developed with ❤️ to accelerate the development of robust and secure systems.**
+<div align="center">
+  <strong>Desenvolvido com ❤️ para profissionais de Red Team</strong>
+  
+  K9 - Seu guardião na gestão de pentests
+</div>

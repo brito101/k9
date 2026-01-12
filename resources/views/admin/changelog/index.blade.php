@@ -2,14 +2,6 @@
 
 @section('title', '- Changelog')
 
-@section('adminlte_css')
-    <style>
-        .dark-mode .callout.callout-info {
-            border-left-color: #007bff ;
-        }
-    </style>
-@endsection
-
 @section('content')
     <div class="content-header">
         <div class="container-fluid">
@@ -46,7 +38,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <h4>Versionamento:</h4>
-                                <x-adminlte-callout theme="info" class="elevation-2" title-class="text-uppercase"
+                                <x-adminlte-callout theme="danger" class="elevation-2" title-class="text-uppercase"
                                     title="1.0.0">
                                     <ul>
                                         <li>Módulo de ACL com perfis e permissões</li>
@@ -75,17 +67,17 @@
                     <div class="col-12 col-md-12 col-lg-6 order-1 order-md-2 overflow-auto" style="max-height: 65vh;">
 
                         <x-adminlte-profile-widget name="{{ env('APP_NAME') }}" desc="{{ env('APP_DES') }}"
-                            theme="bg-gradient-dark" img="{{ asset('img/favicon.svg') }}" layout-type="classic">
+                            theme="bg-gradient-dark" img="{{ asset('images/k9.png') }}" layout-type="classic">
                             <x-adminlte-profile-row-item
                                 title="Rodrigo Carvalho de Brito, e-mail: contato@rodrigobrito.dev.br"
                                 class="text-left border-bottom border-secondary" />
-                            <x-adminlte-profile-col-item title="Javascript" icon="fab fa-2x fa-js text-primary" size=4 />
-                            <x-adminlte-profile-col-item title="PHP" icon="fab fa-2x fa-php text-primary" ssize=4 />
-                            <x-adminlte-profile-col-item title="HTML5" icon="fab fa-2x fa-html5 text-primary" size=4 />
-                            <x-adminlte-profile-col-item title="CSS3" icon="fab fa-2x fa-css3 text-primary" size=4 />
-                            <x-adminlte-profile-col-item title="Bootstrap" icon="fab fa-2x fa-bootstrap text-primary"
+                            <x-adminlte-profile-col-item title="Javascript" icon="fab fa-2x fa-js text-danger" size=4 />
+                            <x-adminlte-profile-col-item title="PHP" icon="fab fa-2x fa-php text-danger" ssize=4 />
+                            <x-adminlte-profile-col-item title="HTML5" icon="fab fa-2x fa-html5 text-danger" size=4 />
+                            <x-adminlte-profile-col-item title="CSS3" icon="fab fa-2x fa-css3 text-danger" size=4 />
+                            <x-adminlte-profile-col-item title="Bootstrap" icon="fab fa-2x fa-bootstrap text-danger"
                                 size=4 />
-                            <x-adminlte-profile-col-item title="Laravel" icon="fab fa-2x fa-laravel text-primary" size=4 />
+                            <x-adminlte-profile-col-item title="Laravel" icon="fab fa-2x fa-laravel text-danger" size=4 />
                         </x-adminlte-profile-widget>
                     </div>
                 </div>
