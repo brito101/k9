@@ -217,7 +217,7 @@ class AdminController extends Controller
         // Obter todos os anos com pentests existentes, ordenados
         $years = Pentest::select('year')
             ->distinct()
-            ->orderBy('year', 'desc')
+            ->orderBy('year', 'asc')
             ->pluck('year')
             ->toArray();
 
