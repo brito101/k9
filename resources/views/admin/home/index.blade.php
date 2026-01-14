@@ -168,6 +168,197 @@
                 </div>
             </div>
 
+            {{-- Carousel de Pentests --}}
+            @if ($carouselPentests->count() > 0)
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-list-alt mr-2"></i> Pentests Recentes</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="carouselPentests" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">
+                                        @foreach ($carouselPentests as $index => $pentest)
+                                            <button type="button" data-bs-target="#carouselPentests"
+                                                data-bs-slide-to="{{ $index }}" @class(['active' => $index === 0])
+                                                aria-current="{{ $index === 0 ? 'true' : 'false' }}"
+                                                aria-label="Slide {{ $index + 1 }}"></button>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="carousel-inner">
+                                        @foreach ($carouselPentests as $index => $pentest)
+                                            <div @class(['carousel-item', 'active' => $index === 0])>
+                                                <div class="row justify-content-center">
+                                                    <div class="col-12 col-md-10 col-lg-8">
+                                                        <div class="card card-widget widget-user shadow border-top border-danger"
+                                                            style="min-height: 550px; max-height: 550px;">
+                                                            <div class="widget-user-header" style="height: unset !important;">
+                                                                <a href="{{ route('admin.pentests.show', $pentest['id']) }}"
+                                                                    class="btn btn-sm btn-primary btn-flat float-right"
+                                                                    title="Ver Detalhes">
+                                                                    <i class="fas fa-eye"></i></a>
+                                                                <h3 class="widget-user-username">{{ $pentest['name'] }}
+                                                                </h3>
+
+                                                                <h5 class="widget-user-desc text-sm text-muted">
+                                                                    {{ $pentest['status'] }} <span
+                                                                        class="badge badge-sm bg-warning">{{ $pentest['year'] }}</span>
+                                                                </h5>
+                                                            </div>
+                                                            
+                                                            <div class="card-footer"
+                                                                style="height: 430px; overflow: hidden;">
+                                                                <div class="row h-100">
+                                                                    <div
+                                                                        class="col-sm-12 col-lg-3 border-right border-danger px-2">
+                                                                        <div class="description-block mb-3">
+                                                                            <h5 class="description-header text-muted">
+                                                                                Vulnerabilidades
+                                                                                por
+                                                                                Criticidade</h5>
+                                                                        </div>
+
+                                                                        @php
+                                                                            $maxCount = max(
+                                                                                $pentest['critical'],
+                                                                                $pentest['high'],
+                                                                                $pentest['medium'],
+                                                                                $pentest['low'],
+                                                                                $pentest['informative'],
+                                                                            );
+                                                                        @endphp
+
+                                                                        @if($maxCount === 0)
+                                                                            <p>Nenhuma vulnerabilidade encontrada.</p>
+                                                                        @endif
+
+                                                                        @if ($pentest['critical'] > 0)
+                                                                            <div class="mb-2">
+                                                                                <div
+                                                                                    class="d-flex justify-content-between mb-1">
+                                                                                    <span class="text-sm">Críticas</span>
+                                                                                    <span
+                                                                                        class="text-sm font-weight-bold">{{ $pentest['critical'] }}/{{ $pentest['vulnerabilities_count'] }}</span>
+                                                                                </div>
+                                                                                <div class="progress"
+                                                                                    style="height: 8px;">
+                                                                                    <div class="progress-bar bg-dark"
+                                                                                        style="width: {{ $maxCount > 0 ? ($pentest['critical'] / $maxCount) * 100 : 0 }}%">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        @if ($pentest['high'] > 0)
+                                                                            <div class="mb-2">
+                                                                                <div
+                                                                                    class="d-flex justify-content-between mb-1">
+                                                                                    <span class="text-sm">Altas</span>
+                                                                                    <span
+                                                                                        class="text-sm font-weight-bold">{{ $pentest['high'] }}/{{ $pentest['vulnerabilities_count'] }}</span>
+                                                                                </div>
+                                                                                <div class="progress"
+                                                                                    style="height: 8px;">
+                                                                                    <div class="progress-bar bg-danger"
+                                                                                        style="width: {{ $maxCount > 0 ? ($pentest['high'] / $maxCount) * 100 : 0 }}%">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        @if ($pentest['medium'] > 0)
+                                                                            <div class="mb-2">
+                                                                                <div
+                                                                                    class="d-flex justify-content-between mb-1">
+                                                                                    <span class="text-sm">Médias</span>
+                                                                                    <span
+                                                                                        class="text-sm font-weight-bold">{{ $pentest['medium'] }}/{{ $pentest['vulnerabilities_count'] }}</span>
+                                                                                </div>
+                                                                                <div class="progress"
+                                                                                    style="height: 8px;">
+                                                                                    <div class="progress-bar bg-warning"
+                                                                                        style="width: {{ $maxCount > 0 ? ($pentest['medium'] / $maxCount) * 100 : 0 }}%">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        @if ($pentest['low'] > 0)
+                                                                            <div class="mb-2">
+                                                                                <div
+                                                                                    class="d-flex justify-content-between mb-1">
+                                                                                    <span class="text-sm">Baixas</span>
+                                                                                    <span
+                                                                                        class="text-sm font-weight-bold">{{ $pentest['low'] }}/{{ $pentest['vulnerabilities_count'] }}</span>
+                                                                                </div>
+                                                                                <div class="progress"
+                                                                                    style="height: 8px;">
+                                                                                    <div class="progress-bar bg-info"
+                                                                                        style="width: {{ $maxCount > 0 ? ($pentest['low'] / $maxCount) * 100 : 0 }}%">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        @if ($pentest['informative'] > 0)
+                                                                            <div class="mb-2">
+                                                                                <div
+                                                                                    class="d-flex justify-content-between mb-1">
+                                                                                    <span
+                                                                                        class="text-sm">Informativas</span>
+                                                                                    <span
+                                                                                        class="text-sm font-weight-bold">{{ $pentest['informative'] }}/{{ $pentest['vulnerabilities_count'] }}</span>
+                                                                                </div>
+                                                                                <div class="progress"
+                                                                                    style="height: 8px;">
+                                                                                    <div class="progress-bar bg-success"
+                                                                                        style="width: {{ $maxCount > 0 ? ($pentest['informative'] / $maxCount) * 100 : 0 }}%">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="col-sm-12 col-lg-9 d-flex flex-column">
+                                                                        <div class="description-block flex-grow-1">
+                                                                            <h5 class="description-header text-muted mb-2">
+                                                                                Conclusão
+                                                                            </h5>
+                                                                            <div class="description-text px-2"
+                                                                                style="max-height: 280px; overflow-y: auto; text-align: justify; padding-right: 10px; text-transform: unset;">
+                                                                                {!! $pentest['conclusion'] !!}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <button class="carousel-control-prev" type="button"
+                                        data-bs-target="#carouselPentests" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-3"
+                                            aria-hidden="true"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                        data-bs-target="#carouselPentests" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon bg-dark rounded-circle p-3"
+                                            aria-hidden="true"></span>
+                                        <span class="visually-hidden">Próximo</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @if (!empty($globalStats['years']))
                 {{-- Dados Globais - Visão Geral --}}
                 <div class="row">
@@ -325,7 +516,6 @@
                             'Navegador',
                             'Usuário',
                             'Método',
-                            'Requisição',
                         ];
                         $config = [
                             'ajax' => url('/admin'),
@@ -338,7 +528,6 @@
                                 ['data' => 'browser', 'name' => 'browser'],
                                 ['data' => 'name', 'name' => 'name'],
                                 ['data' => 'method', 'name' => 'method'],
-                                ['data' => 'request', 'name' => 'request'],
                             ],
                             'language' => ['url' => asset('vendor/datatables/js/pt-BR.json')],
                             'order' => [0, 'desc'],

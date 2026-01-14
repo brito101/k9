@@ -10,6 +10,7 @@ use App\Models\Views\VisitYesterday;
 use App\Models\Vulnerability;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use stdClass;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -31,6 +32,9 @@ class AdminController extends Controller
                 ->addColumn('time', function ($row) {
                     return date(('H:i:s'), strtotime($row->created_at));
                 })
+                ->addColumn('request', function ($row) {
+                    return Str::limit($row->request, 50);
+                })
                 ->addIndexColumn()
                 ->rawColumns(['time'])
                 ->make(true);
@@ -49,6 +53,30 @@ class AdminController extends Controller
         /** Global Statistics */
         $globalStats = $this->globalStatistics();
 
+        /** Pentests for Carousel */
+        $carouselPentests = Pentest::with(['vulnerabilities'])
+            ->whereNotNull('conclusion')
+            ->where('conclusion', '!=', '')
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($pentest) {
+                $vulnerabilities = $pentest->vulnerabilities;
+                return [
+                    'id' => $pentest->id,
+                    'name' => $pentest->application_name,
+                    'vulnerabilities_count' => $vulnerabilities->count(),
+                    'critical' => $vulnerabilities->where('criticality', 'critical')->count(),
+                    'high' => $vulnerabilities->where('criticality', 'high')->count(),
+                    'medium' => $vulnerabilities->where('criticality', 'medium')->count(),
+                    'low' => $vulnerabilities->where('criticality', 'low')->count(),
+                    'informative' => $vulnerabilities->where('criticality', 'informative')->count(),
+                    'conclusion' => $pentest->conclusion,
+                    'status' => $pentest->completion_date ? 'Finalizado' : 'Em Andamento',
+                    'year' => $pentest->year,
+                ];
+            });
+
         return view('admin.home.index', compact(
             'onlineUsers',
             'percent',
@@ -56,6 +84,7 @@ class AdminController extends Controller
             'chart',
             'pentestStats',
             'globalStats',
+            'carouselPentests',
         ));
     }
 
