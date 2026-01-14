@@ -114,7 +114,7 @@
                                             <h3>{{ $pentestStats['unresolved'] }}
                                                 <small>({{ 100 - $pentestStats['resolvedPercent'] }}%)</small></span>
                                             </h3>
-                                            <p>Não Sanadas</p>
+                                            <p>Não Mitigadas</p>
                                         </div>
                                         <div class="icon">
                                             <i class="fas fa-exclamation-triangle"></i>

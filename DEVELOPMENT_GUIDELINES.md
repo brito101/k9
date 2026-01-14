@@ -827,11 +827,11 @@ TextProcessor::store(string $title, string $package, string $text = '', bool $xs
 **Exemplo de uso em controllers:**
 ```php
 // Ao criar um registro
-if ($request->observations) {
-    $data['observations'] = TextProcessor::store(
+if ($request->recommendations) {
+    $data['recommendations'] = TextProcessor::store(
         $request->pentest_id,                    // UUID do registro pai
         'pentests/vulnerabilities',               // Subdiretório
-        $request->observations                    // Conteúdo HTML
+        $request->recommendations                    // Conteúdo HTML
     );
 }
 
@@ -922,7 +922,7 @@ protected $fillable = [
 // Model
 protected $fillable = [
     'version',        // ✅ Inglês
-    'author',         // ✅ Inglês
+    'responsible',         // ✅ Inglês
     'start_date',     // ✅ Inglês
 ];
 
@@ -930,7 +930,7 @@ protected $fillable = [
 Schema::create('pentests', function (Blueprint $table) {
     $table->string('version', 50);      // ✅ Inglês
     $table->date('start_date');         // ✅ Inglês
-    $table->string('responsible', 200); // ✅ Inglês
+    $table->string('applicant', 200); // ✅ Inglês
 });
 
 // View (Blade)

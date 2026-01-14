@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('criticality', ['critical', 'high', 'medium', 'low', 'informative']);
             $table->boolean('is_resolved')->default(false);
             $table->date('resolved_at')->nullable();
-            $table->longText('observations')->nullable();
+            $table->longText('recommendations')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

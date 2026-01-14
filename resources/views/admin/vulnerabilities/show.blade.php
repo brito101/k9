@@ -77,14 +77,14 @@
                                         <dt class="col-sm-3">Status:</dt>
                                         <dd class="col-sm-9">
                                             @if ($vulnerability->is_resolved)
-                                                <span class="badge badge-success">Sanada</span>
+                                                <span class="badge badge-success">Mitigada</span>
                                             @else
-                                                <span class="badge badge-danger">Não Sanada</span>
+                                                <span class="badge badge-danger">Não Mitigada</span>
                                             @endif
                                         </dd>
 
                                         @if ($vulnerability->resolved_at)
-                                            <dt class="col-sm-3">Data de Resolução:</dt>
+                                            <dt class="col-sm-3">Data de Mitigação:</dt>
                                             <dd class="col-sm-9">{{ $vulnerability->resolved_at->format('d/m/Y') }}</dd>
                                         @endif
                                     </dl>
@@ -98,14 +98,24 @@
                                     <h5>Descrição:</h5>
                                     <p>{{ $vulnerability->description }}</p>
                                 </div>
-                            </div>
+                            </div>                            
 
-                            @if ($vulnerability->observations)
+                            @if ($vulnerability->recommendations)
                                 <hr class="border border-light" />
                                 <div class="row mt-3">
                                     <div class="col-12">
-                                        <h5>Observações:</h5>
-                                        <div>{!! $vulnerability->observations !!}</div>
+                                        <h5>Recomendações:</h5>
+                                        <div>{!! $vulnerability->recommendations !!}</div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($vulnerability->mitigation_action)
+                                <hr class="border border-light" />
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <h5>Ação Tomada para a Mitigação:</h5>
+                                        <div>{!! $vulnerability->mitigation_action !!}</div>
                                     </div>
                                 </div>
                             @endif

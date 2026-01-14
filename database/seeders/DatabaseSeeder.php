@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             RolesTableSeeder::class,
             RolesHasPermissionTableSeeder::class,
             ModelHasRoleTableSeeder::class,
+            PentestsTableSeeder::class,
         ]);
     }
 }

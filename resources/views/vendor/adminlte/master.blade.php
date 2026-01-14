@@ -19,6 +19,9 @@
             @yield('title_postfix', config('adminlte.title_postfix', ''))
         </title>
 
+        {{-- PWA (Favicon e Manifest) --}}
+        @laravelPWA
+
         {{-- Vite --}}
         @vite(['resources/js/app.js', 'resources/sass/app.scss'])
         
@@ -56,7 +59,7 @@
         @if (config('adminlte.use_ico_only'))
             <link rel="shortcut png" href="{{ asset('images/k9.png') }}" />
         @elseif(config('adminlte.use_full_favicon'))
-            <link rel="shortcut icon" href="{{ asset('favicons/favicon.ico') }}" />
+            <link rel="shortcut png" href="{{ asset('images/k9.png') }}" />
             <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">
             <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('favicons/apple-icon-60x60.png') }}">
             <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('favicons/apple-icon-72x72.png') }}">

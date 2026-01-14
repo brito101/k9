@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pentests', function (Blueprint $table) {
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])
-                ->default('medium')
-                ->after('responsible');
+        Schema::table('vulnerabilities', function (Blueprint $table) {
+            $table->longText('mitigation_action')->nullable()->after('resolved_at');
         });
     }
 
@@ -23,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pentests', function (Blueprint $table) {
-            $table->dropColumn('priority');
+        Schema::table('vulnerabilities', function (Blueprint $table) {
+            $table->dropColumn('mitigation_action');
         });
     }
 };

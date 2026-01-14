@@ -49,7 +49,7 @@
 
 ### 🐛 Gestão de Vulnerabilidades
 - **Classificação por criticidade** (Crítica, Alta, Média, Baixa, Informativa)
-- **Rastreamento de status** (Sanada, Não Sanada)
+- **Rastreamento de status** (Mitigada, Não Mitigada)
 - **Documentação técnica** completa
 - **Evidências e observações**
 - **Vinculação com pentests**

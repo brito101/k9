@@ -84,23 +84,6 @@
                                                 Informativa</option>
                                         </x-adminlte-select2>
                                     </div>
-                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2">
-                                        <label for="resolved_at">Data de Resolução</label>
-                                        <input type="date" class="form-control" id="resolved_at" name="resolved_at"
-                                            value="{{ old('resolved_at', $vulnerability->resolved_at?->format('Y-m-d')) }}">
-                                        <input type="hidden" name="is_resolved" id="is_resolved"
-                                            value="{{ old('is_resolved', $vulnerability->is_resolved ? '1' : '0') }}">
-                                    </div>
-
-                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2">
-                                        <div class="icheck-primary">
-                                            <input type="checkbox" style="cursor: pointer" id="is_resolved_check"
-                                                {{ $vulnerability->is_resolved ? 'checked' : '' }}>
-                                            <label for="is_resolved_check" class="my-0 ml-2">
-                                                <strong>Vulnerabilidade Sanada</strong>
-                                            </label>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 @php
@@ -124,11 +107,43 @@
 
                                 <div class="d-flex flex-wrap justify-content-between">
                                     <div class="col-12 form-group px-0 mb-0">
-                                        <x-adminlte-text-editor name="observations" id="observations" label="Observações"
+                                        <x-adminlte-text-editor name="recommendations" id="recommendations" label="Recomendações"
                                             label-class="text-black" igroup-size="md"
-                                            placeholder="Observações detalhadas sobre a vulnerabilidade..."
+                                            placeholder="Recomendações detalhadas sobre a vulnerabilidade..."
                                             :config="$config">
-                                            {!! old('observations', $vulnerability->observations) !!}
+                                            {!! old('recommendations', $vulnerability->recommendations) !!}
+                                        </x-adminlte-text-editor>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap justify-content-start align-items-end">
+                                    
+                                    <div class="col-12 col-md-3 form-group px-0 pr-md-2">
+                                        <label for="resolved_at">Data de Mitigação</label>
+                                        <input type="date" class="form-control" id="resolved_at" name="resolved_at"
+                                            value="{{ old('resolved_at', $vulnerability->resolved_at?->format('Y-m-d')) }}">
+                                        <input type="hidden" name="is_resolved" id="is_resolved"
+                                            value="{{ old('is_resolved', $vulnerability->is_resolved ? '1' : '0') }}">
+                                    </div>
+
+                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2">
+                                        <div class="icheck-primary">
+                                            <input type="checkbox" style="cursor: pointer" id="is_resolved_check"
+                                                {{ $vulnerability->is_resolved ? 'checked' : '' }}>
+                                            <label for="is_resolved_check" class="my-0 ml-2">
+                                                <strong>Vulnerabilidade Mitigada</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap justify-content-between">
+                                    <div class="col-12 form-group px-0 mb-0">
+                                        <x-adminlte-text-editor name="mitigation_action" id="mitigation_action" label="Ação Tomada para a Mitigação"
+                                            label-class="text-black" igroup-size="md"
+                                            placeholder="Descreva a ação tomada para mitigar a vulnerabilidade..."
+                                            :config="$config">
+                                            {!! old('mitigation_action', $vulnerability->mitigation_action) !!}
                                         </x-adminlte-text-editor>
                                     </div>
                                 </div>

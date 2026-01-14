@@ -169,7 +169,7 @@ class AdminController extends Controller
         $lowPercent = $totalVulnerabilities > 0 ? round(($low / $totalVulnerabilities) * 100, 1) : 0;
         $informativePercent = $totalVulnerabilities > 0 ? round(($informative / $totalVulnerabilities) * 100, 1) : 0;
 
-        // Vulnerabilidades sanadas
+        // Vulnerabilidades mitigadas
         $resolved = $vulnerabilities->whereNotNull('resolved_at')->count();
         $unresolved = $totalVulnerabilities - $resolved;
         $resolvedPercent = $totalVulnerabilities > 0 ? round(($resolved / $totalVulnerabilities) * 100, 1) : 0;
