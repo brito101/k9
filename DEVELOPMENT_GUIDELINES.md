@@ -1222,7 +1222,400 @@ npm run dev                         # Modo desenvolvimento
 
 ---
 
-## 📚 RECURSOS E DOCUMENTAÇÃO
+## 📊 ORDENAÇÃO DE VULNERABILIDADES (display_order)
+
+### 1. Coluna `display_order` (integer)
+
+A entidade **Vulnerability** possui uma coluna `display_order` que representa a sequência lógica de descoberta das vulnerabilidades em um pentest.
+
+**Estrutura no banco**:
+```sql
+display_order INT DEFAULT 0 NOT NULL
+-- Index composto para performance: [pentest_id, display_order]
+```
+
+**Model** (`app/Models/Vulnerability.php`):
+```php
+protected $fillable = [
+    // ... outros campos
+    'display_order',
+];
+```
+
+### 2. Comportamento de Ordenação
+
+#### 2.1. Criação de Vulnerabilidade (store)
+
+**Sem display_order especificado** (comportamento padrão):
+```php
+// Obtém o próximo número sequencial
+$maxOrder = Vulnerability::where('pentest_id', $request->pentest_id)
+    ->max('display_order') ?? 0;
+$data['display_order'] = $maxOrder + 1;
+```
+
+**Com display_order especificado** (inserção em posição específica):
+```php
+$desiredOrder = (int) $request->display_order;
+
+// Incrementa ordem de todas as vulnerabilidades >= posição desejada
+Vulnerability::where('pentest_id', $request->pentest_id)
+    ->where('display_order', '>=', $desiredOrder)
+    ->increment('display_order');
+
+$data['display_order'] = $desiredOrder;
+```
+
+#### 2.2. Atualização de Vulnerabilidade (update)
+
+**Movendo para posição SUPERIOR** (ordem menor):
+```php
+if ($newOrder < $oldOrder) {
+    // Incrementa itens entre nova e antiga posição
+    Vulnerability::where('pentest_id', $pentestId)
+        ->where('id', '!=', $id)
+        ->where('display_order', '>=', $newOrder)
+        ->where('display_order', '<', $oldOrder)
+        ->increment('display_order');
+}
+```
+
+**Movendo para posição INFERIOR** (ordem maior):
+```php
+if ($newOrder > $oldOrder) {
+    // Decrementa itens entre antiga e nova posição
+    Vulnerability::where('pentest_id', $pentestId)
+        ->where('id', '!=', $id)
+        ->where('display_order', '>', $oldOrder)
+        ->where('display_order', '<=', $newOrder)
+        ->decrement('display_order');
+}
+```
+
+#### 2.3. Exclusão de Vulnerabilidade (destroy)
+
+**Reordenação automática após exclusão**:
+```php
+$deletedOrder = $vulnerability->display_order;
+
+// Decrementa ordem de todas vulnerabilidades posteriores
+Vulnerability::where('pentest_id', $pentestId)
+    ->where('display_order', '>', $deletedOrder)
+    ->decrement('display_order');
+```
+
+### 3. Validação e Formulários
+
+**VulnerabilityRequest**:
+```php
+public function rules(): array
+{
+    return [
+        // ... outros campos
+        'display_order' => 'nullable|integer|min:1',
+    ];
+}
+
+protected function prepareForValidation(): void
+{
+    // Converter string vazia para null
+    $this->merge([
+        'display_order' => $this->display_order === '' ? null : $this->display_order,
+    ]);
+}
+```
+
+**Formulário Create**:
+```php
+<div class="form-group">
+    <label for="display_order">Ordem (opcional)</label>
+    <input type="number" name="display_order" id="display_order" 
+           class="form-control" min="1" 
+           placeholder="Deixe em branco para adicionar ao final">
+</div>
+```
+
+**Formulário Edit**:
+```php
+<div class="form-group">
+    <label for="display_order">Ordem <i class="fas fa-asterisk text-danger"></i></label>
+    <input type="number" name="display_order" id="display_order" 
+           class="form-control" min="1" required
+           value="{{ old('display_order', $vulnerability->display_order) }}">
+</div>
+```
+
+### 4. Exibição nas Views
+
+**DataTables**:
+```php
+// Adicionar coluna "Ordem" nas listagens
+columns: [
+    // ...
+    { data: 'display_order', name: 'display_order', title: 'Ordem' },
+    // ...
+],
+order: [[coluna_display_order, 'asc']], // Ordenar por padrão
+```
+
+### 5. Queries com Ordenação
+
+**Sempre** ordenar por `display_order` ao listar vulnerabilidades:
+
+```php
+$vulnerabilities = Vulnerability::where('pentest_id', $pentestId)
+    ->orderBy('display_order', 'asc')
+    ->get();
+```
+
+### 6. ⚠️ CONSIDERAÇÕES IMPORTANTES
+
+1. **Scope**: A ordenação é **por pentest** (cada pentest tem sua própria sequência)
+2. **Integridade**: O sistema mantém automaticamente a sequência sem "buracos"
+3. **Performance**: Index composto `[pentest_id, display_order]` otimiza queries
+4. **Flexibilidade**: 
+   - Create: Ordem opcional (default: final da lista)
+   - Edit: Ordem obrigatória (permite reordenação)
+5. **Atomicidade**: Operações de reordenação são transacionais
+
+---
+
+## � VISIBILIDADE E CONTROLE DE ACESSO DE VULNERABILIDADES
+
+### 1. Coluna `is_visible` (boolean)
+
+A entidade **Vulnerability** possui uma coluna `is_visible` que controla a visibilidade das vulnerabilidades baseada em perfis de usuário.
+
+**Estrutura no banco**:
+```sql
+is_visible TINYINT(1) DEFAULT 0 NOT NULL
+```
+
+**Model** (`app/Models/Vulnerability.php`):
+```php
+protected $fillable = [
+    // ... outros campos
+    'is_visible',
+];
+
+protected $casts = [
+    'is_visible' => 'boolean',
+];
+```
+
+### 2. Regras de Acesso por Perfil
+
+#### Perfis Privilegiados (Acesso Total)
+Estes perfis podem **visualizar, editar e excluir** TODAS as vulnerabilidades (visíveis e invisíveis):
+- **Programador**
+- **Administrador**
+- **Pentester**
+
+#### Perfis Restritos (Acesso Filtrado)
+Estes perfis podem **visualizar, editar e excluir** SOMENTE vulnerabilidades com `is_visible = true`:
+- **Gestor**
+- **Coordenador**
+- **Desenvolvedor**
+
+### 3. Padrão de Implementação nos Controllers
+
+#### 3.1. Estrutura Base de Filtragem
+
+**SEMPRE** aplique este padrão em métodos que manipulam vulnerabilidades:
+
+```php
+// Obter usuário autenticado
+$user = auth()->user();
+
+// Verificar se é perfil privilegiado
+$isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+
+// Aplicar filtro de visibilidade
+if (!$isPrivilegedUser) {
+    $query->where('is_visible', true);
+}
+```
+
+#### 3.2. Validação em Métodos de Manipulação
+
+Para métodos `show()`, `edit()`, `update()` e `destroy()` de vulnerabilidades:
+
+```php
+public function edit(string $id)
+{
+    CheckPermission::checkAuth('Editar Vulnerabilidades');
+    
+    $vulnerability = Vulnerability::with('pentest')->find($id);
+    if (!$vulnerability) {
+        abort(403, 'Acesso não autorizado');
+    }
+    
+    // Verificar visibilidade baseada no perfil
+    $user = auth()->user();
+    $isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+    
+    if (!$isPrivilegedUser && !$vulnerability->is_visible) {
+        abort(403, 'Acesso não autorizado');
+    }
+    
+    return view('admin.vulnerabilities.edit', compact('vulnerability'));
+}
+```
+
+#### 3.3. Filtragem em Queries e Estatísticas
+
+Para listagens, contagens e estatísticas:
+
+```php
+// Exemplo em index()
+$query = Vulnerability::with('pentest:id,application_name');
+
+$user = auth()->user();
+$isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+
+if (!$isPrivilegedUser) {
+    $query->where('is_visible', true);
+}
+
+$vulnerabilities = $query->orderBy('display_order', 'asc')->get();
+```
+
+```php
+// Exemplo com relacionamentos em PentestController::show()
+$vulnerabilitiesQuery = $pentest->vulnerabilities();
+
+$user = auth()->user();
+$isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+
+if (!$isPrivilegedUser) {
+    $vulnerabilitiesQuery->where('is_visible', true);
+}
+
+// Usar clone para reutilizar o query builder
+$totalVulnerabilities = (clone $vulnerabilitiesQuery)->count();
+$resolvedVulnerabilities = (clone $vulnerabilitiesQuery)->where('is_resolved', true)->count();
+```
+
+```php
+// Exemplo com eager loading em AdminController::index()
+$carouselPentests = Pentest::with(['vulnerabilities' => function ($query) use ($user) {
+        $isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+        if (!$isPrivilegedUser) {
+            $query->where('is_visible', true);
+        }
+    }])
+    ->whereNotNull('conclusion')
+    ->latest('created_at')
+    ->limit(10)
+    ->get();
+```
+
+### 4. Controllers que Manipulam Vulnerabilidades
+
+Todos estes controllers **DEVEM** implementar o controle de visibilidade:
+
+#### 4.1. VulnerabilityController
+- ✅ `index()`: Filtra listagem
+- ✅ `show()`: Valida antes de exibir
+- ✅ `edit()`: Valida antes de editar
+- ✅ `update()`: Valida antes de atualizar
+- ✅ `destroy()`: Valida antes de excluir
+- ✅ `datatable()`: Filtra vulnerabilidades do pentest
+
+#### 4.2. PentestController
+- ✅ `show()`: Filtra TODAS as estatísticas e contagens
+
+#### 4.3. AdminController
+- ✅ `index()`: Filtra vulnerabilidades no carousel
+- ✅ `pentestStatistics()`: Filtra estatísticas do ano corrente
+- ✅ `globalStatistics()`: Filtra estatísticas históricas por ano
+
+### 5. Validação de Formulários
+
+No **VulnerabilityRequest** (`app/Http/Requests/Admin/VulnerabilityRequest.php`):
+
+```php
+public function rules(): array
+{
+    return [
+        // ... outros campos
+        'is_visible' => 'boolean',
+    ];
+}
+
+protected function prepareForValidation(): void
+{
+    // Converter checkbox para boolean
+    $this->merge([
+        'is_visible' => $this->has('is_visible'),
+    ]);
+}
+```
+
+### 6. Views e Formulários
+
+**Create** (`resources/views/admin/vulnerabilities/create.blade.php`):
+```php
+<div class="icheck-bootstrap d-inline">
+    <input type="checkbox" name="is_visible" id="is_visible" checked>
+    <label for="is_visible">Visível para todos os perfis</label>
+</div>
+```
+
+**Edit** (`resources/views/admin/vulnerabilities/edit.blade.php`):
+```php
+<div class="icheck-bootstrap d-inline">
+    <input type="checkbox" name="is_visible" id="is_visible" 
+           {{ $vulnerability->is_visible ? 'checked' : '' }}>
+    <label for="is_visible">Visível para todos os perfis</label>
+</div>
+<small class="form-text text-muted">
+    Perfis Gestor, Coordenador e Desenvolvedor só verão se marcado
+</small>
+```
+
+### 7. Seeder e Testes
+
+**PentestsTableSeeder**:
+```php
+// 70% das vulnerabilidades visíveis, 30% invisíveis
+'is_visible' => $faker->boolean(70),
+```
+
+### 8. ⚠️ CHECKLIST DE IMPLEMENTAÇÃO
+
+Ao criar novos métodos ou controllers que manipulam vulnerabilidades:
+
+- [ ] Aplicar filtro `is_visible` em queries de listagem
+- [ ] Validar visibilidade em `show()`, `edit()`, `update()`, `destroy()`
+- [ ] Usar `hasAnyRole(['Programador', 'Administrador', 'Pentester'])`
+- [ ] Criar variável explícita `$isPrivilegedUser` para clareza
+- [ ] Aplicar `(clone $query)` ao reutilizar query builder
+- [ ] Filtrar eager loading com closure quando necessário
+- [ ] Retornar `abort(403)` para acesso não autorizado
+- [ ] Incluir checkbox `is_visible` em formulários
+- [ ] Documentar o comportamento em comentários quando complexo
+
+### 9. ❌ ERROS COMUNS A EVITAR
+
+1. **Não** usar `hasRole('Programador|Administrador|Pentester')` com pipe
+   - ✅ Use: `hasAnyRole(['Programador', 'Administrador', 'Pentester'])`
+
+2. **Não** esquecer de aplicar filtro em estatísticas e contagens
+   - ✅ Filtrar em TODAS as queries que envolvem vulnerabilidades
+
+3. **Não** validar visibilidade apenas na listagem
+   - ✅ Validar também em `show()`, `edit()`, `update()`, `destroy()`
+
+4. **Não** reutilizar query builder sem `clone`
+   - ✅ Use: `(clone $query)->count()`
+
+5. **Não** usar mensagens de erro genéricas
+   - ✅ Use: `abort(403, 'Acesso não autorizado')`
+
+---
+
+## �📚 RECURSOS E DOCUMENTAÇÃO
 
 ### Documentação Oficial
 - Laravel 12: https://laravel.com/docs/12.x
@@ -1245,9 +1638,13 @@ Este arquivo deve ser atualizado sempre que:
 - Novas dependências importantes forem adicionadas
 - Regras de desenvolvimento forem modificadas
 
-**Data da última atualização**: 07/01/2026
+**Data da última atualização**: 15/01/2026
 
 ### Últimas Alterações
+- **15/01/2026**: Adicionada seção completa sobre ordenação de vulnerabilidades (display_order) com comportamentos de criação, atualização e exclusão
+- **15/01/2026**: Adicionada seção completa sobre visibilidade e controle de acesso de vulnerabilidades (is_visible) com padrões de implementação, validação e exemplos práticos
+- **15/01/2026**: Documentado uso de `hasAnyRole()` em vez de `hasRole()` com pipe para perfis privilegiados
+- **15/01/2026**: Adicionado checklist de implementação e erros comuns para controle de visibilidade
 - **07/01/2026**: Padronização dos botões de submit para `btn-success` com ícone e texto "Salvar" em todos os formulários
 - **07/01/2026**: Adicionada regra crítica sobre usar inglês no código e português apenas na interface do usuário
 - **07/01/2026**: Adicionada regra sobre não incluir botões de cancelar ou voltar nos formulários

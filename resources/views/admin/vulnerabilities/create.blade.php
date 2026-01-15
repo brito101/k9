@@ -4,6 +4,10 @@
 @section('plugins.Summernote', true)
 @section('plugins.select2', true)
 
+@section('adminlte_css_pre')
+    <link rel="stylesheet" href="{{ asset('vendor/icheck-bootstrap/icheck-bootstrap.min.css') }}">
+@stop
+
 @section('content')
 
     <section class="content-header">
@@ -54,7 +58,7 @@
                                     </div>
                                 </div>
 
-                                <div class="d-flex flex-wrap justify-content-start">
+                                <div class="d-flex flex-wrap justify-content-start align-items-center">
                                     <div class="col-12 col-md-3 form-group px-0 pr-md-2">
                                         <label for="criticality">Criticidade</label>
                                         <x-adminlte-select2 id="criticality" name="criticality" required>
@@ -66,12 +70,21 @@
                                             <option value="informative" {{ old('criticality') == 'informative' ? 'selected' : '' }}>Informativa</option>
                                         </x-adminlte-select2>
                                     </div>
-                                    <div class="col-12 col-md-2 form-group px-0 pl-md-2">
+                                    <div class="col-12 col-md-2 form-group px-0 px-md-2">
                                         <label for="display_order">Ordem</label>
                                         <input type="number" class="form-control" id="display_order" name="display_order" 
                                             min="1" value="{{ old('display_order') }}" 
                                             placeholder="Auto" title="Deixe em branco para adicionar ao final">
                                         <small class="text-muted">Opcional: deixe vazio para adicionar ao final</small>
+                                    </div>
+                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="checkbox" id="is_visible" name="is_visible" value="1" 
+                                                {{ old('is_visible') ? 'checked' : '' }}>
+                                            <label for="is_visible" class="mt-2 ml-2">
+                                                Visível
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 

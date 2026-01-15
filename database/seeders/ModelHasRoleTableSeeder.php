@@ -21,7 +21,7 @@ class ModelHasRoleTableSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $isLocal = env('APP_ENV') === 'local';
-        
+
         $count = 0;
 
         // Sempre atribui role para o Programador

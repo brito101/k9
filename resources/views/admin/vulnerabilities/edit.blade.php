@@ -62,7 +62,7 @@
                                     </div>
                                 </div>
 
-                                <div class="d-flex flex-wrap justify-content-start align-items-end">
+                                <div class="d-flex flex-wrap justify-content-start align-items-center">
                                     <div class="col-12 col-md-3 form-group px-0 pr-md-2 mb-0">
                                         <label for="criticality">Criticidade</label>
                                         <x-adminlte-select2 id="criticality" name="criticality" required>
@@ -84,12 +84,21 @@
                                                 Informativa</option>
                                         </x-adminlte-select2>
                                     </div>
-                                    <div class="col-12 col-md-2 form-group px-0 pl-md-2 mb-0">
+                                    <div class="col-12 col-md-2 form-group px-0 px-md-2 mb-0">
                                         <label for="display_order">Ordem</label>
                                         <input type="number" class="form-control" id="display_order" name="display_order" 
                                             min="1" value="{{ old('display_order', $vulnerability->display_order) }}" 
                                             required title="Posição da vulnerabilidade na sequência de descoberta">
                                         <small class="text-muted">Posição na sequência lógica</small>
+                                    </div>
+                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2 mb-0">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="checkbox" id="is_visible" name="is_visible" value="1" 
+                                                {{ old('is_visible', $vulnerability->is_visible) ? 'checked' : '' }}>
+                                            <label for="is_visible" class="mt-2 ml-2">
+                                                Visível
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 

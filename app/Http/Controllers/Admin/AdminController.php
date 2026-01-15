@@ -54,7 +54,13 @@ class AdminController extends Controller
         $globalStats = $this->globalStatistics();
 
         /** Pentests for Carousel */
-        $carouselPentests = Pentest::with(['vulnerabilities'])
+        $user = auth()->user();
+        $carouselPentests = Pentest::with(['vulnerabilities' => function ($query) use ($user) {
+            $isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+            if (! $isPrivilegedUser) {
+                $query->where('is_visible', true);
+            }
+        }])
             ->whereNotNull('conclusion')
             ->where('conclusion', '!=', '')
             ->latest('created_at')
@@ -62,6 +68,7 @@ class AdminController extends Controller
             ->get()
             ->map(function ($pentest) {
                 $vulnerabilities = $pentest->vulnerabilities;
+
                 return [
                     'id' => $pentest->id,
                     'name' => $pentest->application_name,
@@ -181,7 +188,15 @@ class AdminController extends Controller
 
         // Vulnerabilidades do ano
         $pentestIds = $pentestsThisYear->pluck('id');
-        $vulnerabilities = Vulnerability::whereIn('pentest_id', $pentestIds)->get();
+        $user = auth()->user();
+        $vulnerabilitiesQuery = Vulnerability::whereIn('pentest_id', $pentestIds);
+
+        $isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+        if (! $isPrivilegedUser) {
+            $vulnerabilitiesQuery->where('is_visible', true);
+        }
+
+        $vulnerabilities = $vulnerabilitiesQuery->get();
         $totalVulnerabilities = $vulnerabilities->count();
 
         // Vulnerabilidades por criticidade
@@ -265,10 +280,20 @@ class AdminController extends Controller
         $totalPentests = 0;
         $totalVulns = 0;
 
+        $user = auth()->user();
+
         foreach ($years as $year) {
             $pentests = Pentest::where('year', $year)->get();
             $pentestIds = $pentests->pluck('id');
-            $vulnerabilities = Vulnerability::whereIn('pentest_id', $pentestIds)->get();
+
+            $vulnerabilitiesQuery = Vulnerability::whereIn('pentest_id', $pentestIds);
+
+            $isPrivilegedUser = $user->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+            if (! $isPrivilegedUser) {
+                $vulnerabilitiesQuery->where('is_visible', true);
+            }
+
+            $vulnerabilities = $vulnerabilitiesQuery->get();
 
             $total = $pentests->count();
             $finalized = $pentests->whereNotNull('completion_date')->count();
