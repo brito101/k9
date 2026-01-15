@@ -211,7 +211,6 @@ return [
         'date_issue' => 'data de emissão',
         'work_card' => 'carteira de trabalho',
         'serie' => 'número de série',
-        'scholarity_id' => 'escolaridade',
         'institution' => 'instituição de ensino',
         'graduation' => 'ano de conclusão',
         'availability' => 'disponibilidade',
@@ -223,6 +222,7 @@ return [
         'activities' => 'atividades',
         'photo' => 'foto',
         'first_access' => 'primeiro acesso',
+        'display_order' => 'ordem',
     ],
 
 ];

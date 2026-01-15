@@ -66,6 +66,13 @@
                                             <option value="informative" {{ old('criticality') == 'informative' ? 'selected' : '' }}>Informativa</option>
                                         </x-adminlte-select2>
                                     </div>
+                                    <div class="col-12 col-md-2 form-group px-0 pl-md-2">
+                                        <label for="display_order">Ordem</label>
+                                        <input type="number" class="form-control" id="display_order" name="display_order" 
+                                            min="1" value="{{ old('display_order') }}" 
+                                            placeholder="Auto" title="Deixe em branco para adicionar ao final">
+                                        <small class="text-muted">Opcional: deixe vazio para adicionar ao final</small>
+                                    </div>
                                 </div>
 
                                 @php

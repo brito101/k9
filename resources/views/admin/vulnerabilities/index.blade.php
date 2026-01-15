@@ -40,6 +40,7 @@
                             @php
                                 $heads = [
                                     ['label' => 'ID', 'width' => 10],
+                                    ['label' => 'Ordem', 'width' => 8],
                                     'Pentest',
                                     'Descrição',
                                     'Criticidade',
@@ -52,6 +53,7 @@
                                     'ajax' => url('admin/vulnerabilities'),
                                     'columns' => [
                                         ['data' => 'id', 'name' => 'id', 'visible' => false],
+                                        ['data' => 'display_order', 'name' => 'display_order'],
                                         ['data' => 'pentest', 'name' => 'pentest'],
                                         ['data' => 'description', 'name' => 'description'],
                                         ['data' => 'criticality_badge', 'name' => 'criticality', 'orderable' => true],
@@ -64,7 +66,7 @@
                                     'processing' => true,
                                     'serverSide' => true,
                                     'responsive' => true,
-                                    'order' => [[5, 'desc']],
+                                    'order' => [[1, 'asc']],
                                     'dom' => '<"d-flex flex-wrap col-12 justify-content-between"Bf>rtip',
                                     'buttons' => [
                                         ['extend' => 'pageLength', 'className' => 'btn-default'],

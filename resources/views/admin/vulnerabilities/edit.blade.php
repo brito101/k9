@@ -84,6 +84,13 @@
                                                 Informativa</option>
                                         </x-adminlte-select2>
                                     </div>
+                                    <div class="col-12 col-md-2 form-group px-0 pl-md-2 mb-0">
+                                        <label for="display_order">Ordem</label>
+                                        <input type="number" class="form-control" id="display_order" name="display_order" 
+                                            min="1" value="{{ old('display_order', $vulnerability->display_order) }}" 
+                                            required title="Posição da vulnerabilidade na sequência de descoberta">
+                                        <small class="text-muted">Posição na sequência lógica</small>
+                                    </div>
                                 </div>
 
                                 @php
