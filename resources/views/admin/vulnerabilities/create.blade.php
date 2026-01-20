@@ -118,26 +118,28 @@
                                     </div>
                                 </div>
 
-                                <div class="d-flex flex-wrap justify-content-start">
-                                    
-                                    <div class="col-12 col-md-3 form-group px-0 pr-md-2">
-                                        <label for="resolved_at">Data de Mitigação (se mitigada)</label>
-                                        <input type="date" class="form-control" id="resolved_at" name="resolved_at"
-                                            value="{{ old('resolved_at') }}">
-                                        <input type="hidden" name="is_resolved" id="is_resolved" value="0">
+                                @if(!auth()->user()->hasRole('Pentester'))
+                                    <div class="d-flex flex-wrap justify-content-start">
+                                        
+                                        <div class="col-12 col-md-3 form-group px-0 pr-md-2">
+                                            <label for="resolved_at">Data de Mitigação (se mitigada)</label>
+                                            <input type="date" class="form-control" id="resolved_at" name="resolved_at"
+                                                value="{{ old('resolved_at') }}">
+                                            <input type="hidden" name="is_resolved" id="is_resolved" value="0">
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="d-flex flex-wrap justify-content-between">
-                                    <div class="col-12 form-group px-0 mb-0">
-                                        <x-adminlte-text-editor name="mitigation_action" id="mitigation_action" label="Ação Tomada para a Mitigação"
-                                            label-class="text-black" igroup-size="md"
-                                            placeholder="Descreva a ação tomada para mitigar a vulnerabilidade..."
-                                            :config="$config">
-                                            {!! old('mitigation_action') !!}
-                                        </x-adminlte-text-editor>
+                                    <div class="d-flex flex-wrap justify-content-between">
+                                        <div class="col-12 form-group px-0 mb-0">
+                                            <x-adminlte-text-editor name="mitigation_action" id="mitigation_action" label="Ação Tomada para a Mitigação"
+                                                label-class="text-black" igroup-size="md"
+                                                placeholder="Descreva a ação tomada para mitigar a vulnerabilidade..."
+                                                :config="$config">
+                                                {!! old('mitigation_action') !!}
+                                            </x-adminlte-text-editor>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
 
                             </div>
 
@@ -155,12 +157,14 @@
     </section>
 
 @section('js')
-    <script>
-        // Auto set is_resolved based on resolved_at
-        document.getElementById('resolved_at').addEventListener('change', function() {
-            document.getElementById('is_resolved').value = this.value ? '1' : '0';
-        });
-    </script>
+    @if(!auth()->user()->hasRole('Pentester'))
+        <script>
+            // Auto set is_resolved based on resolved_at
+            document.getElementById('resolved_at').addEventListener('change', function() {
+                document.getElementById('is_resolved').value = this.value ? '1' : '0';
+            });
+        </script>
+    @endif
 @endsection
 
 @endsection

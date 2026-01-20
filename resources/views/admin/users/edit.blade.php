@@ -99,7 +99,7 @@
                                 </div>
 
                                 <div
-                                    class="col-12 col-md-6 form-group px-0 {{ Auth::user()->hasPermissionTo('Atribuir Perfis') ? 'pr-md-2' : 'pl-md-2' }} d-flex flex-wrap justify-content-start">
+                                    class="col-12 col-md-6 form-group px-0 pr-md-2 d-flex flex-wrap justify-content-start">
                                     @if ($user->google2fa_secret_enabled)
                                         <x-adminlte-input-switch name="google2fa_secret_enabled"
                                             label="Duplo Fator de Autenticação (Google Auth)" data-on-text="Sim"
@@ -149,7 +149,7 @@
                                 @can('Atribuir Perfis')
                                     @if ($user->id != Auth::user()->id)
                                         <div
-                                            class="col-12 col-md-6 form-group px-0 pl-md-2 d-flex flex-wrap justify-content-start">
+                                            class="col-12 col-md-6 form-group px-0 pr-md-2 d-flex flex-wrap justify-content-start">
                                             @if ($user->first_access)
                                                 <x-adminlte-input-switch name="first_access" label="Primeiro Acesso"
                                                     data-on-text="Sim" data-off-text="Não" data-on-color="teal" checked

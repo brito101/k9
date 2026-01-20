@@ -1630,6 +1630,270 @@ Ao criar novos métodos ou controllers que manipulam vulnerabilidades:
 
 ---
 
+## � RESTRIÇÃO DE CAMPOS POR PERFIL
+
+### 1. Visão Geral
+
+Alguns perfis de usuário têm permissão para visualizar dados mas não podem editá-los. Este padrão define como implementar restrições de campos específicos por perfil em formulários.
+
+### 2. Casos de Uso
+
+#### Pentester
+- ✅ Pode criar/editar/excluir vulnerabilidades
+- ✅ Pode editar: descrição, criticidade, recomendações, ordem, visibilidade
+- ❌ **NÃO pode editar**: `resolved_at`, `is_resolved`, `mitigation_action`
+- 👁️ Pode **visualizar** campos de mitigação (sem editar)
+
+#### Desenvolvedor (a implementar)
+- Definir restrições específicas conforme necessário
+
+### 3. Padrão de Implementação
+
+#### 3.1. Backend - Controller
+
+**No método `update()`, remover campos restritos antes de salvar:**
+
+```php
+public function update(VulnerabilityRequest $request, string $id): RedirectResponse
+{
+    CheckPermission::checkAuth('Editar Vulnerabilidades');
+    
+    $vulnerability = Vulnerability::find($id);
+    if (!$vulnerability) {
+        abort(403, 'Acesso não autorizado');
+    }
+    
+    $user = auth()->user();
+    $data = $request->all();
+    
+    // Check if user is Pentester - they cannot edit mitigation fields
+    $isPentester = $user->hasRole('Pentester');
+    
+    if ($isPentester) {
+        // Remove mitigation fields from data if user is Pentester
+        unset($data['resolved_at'], $data['is_resolved'], $data['mitigation_action']);
+    }
+    
+    // ... resto da lógica de update
+}
+```
+
+#### 3.2. Backend - Form Request
+
+**Validação condicional baseada no perfil:**
+
+```php
+protected function prepareForValidation(): void
+{
+    // Check if user is Pentester
+    $isPentester = auth()->check() && auth()->user()->hasRole('Pentester');
+    
+    if (!$isPentester) {
+        // Processar campos de mitigação apenas se não for Pentester
+        if ($this->resolved_at && !$this->has('is_resolved')) {
+            $this->merge(['is_resolved' => true]);
+        }
+    }
+}
+
+public function rules(): array
+{
+    $isPentester = auth()->check() && auth()->user()->hasRole('Pentester');
+    
+    $rules = [
+        'description' => 'required|string|min:10',
+        'criticality' => ['required', Rule::in(['critical', 'high', 'medium', 'low', 'informative'])],
+        // ... regras comuns
+    ];
+    
+    // Only add mitigation field validations if user is not Pentester
+    if (!$isPentester) {
+        $rules['is_resolved'] = 'nullable|boolean';
+        $rules['resolved_at'] = 'nullable|date|required_if:is_resolved,1';
+        $rules['mitigation_action'] = 'nullable|string';
+    }
+    
+    return $rules;
+}
+```
+
+#### 3.3. Frontend - Create (Criar)
+
+**No formulário CREATE, ocultar completamente os campos restritos:**
+
+```php
+{{-- Campos que podem ser editados por todos --}}
+<div class="form-group">
+    <label for="description">Descrição</label>
+    <textarea name="description" required></textarea>
+</div>
+
+@if(!auth()->user()->hasRole('Pentester'))
+    {{-- Campos restritos ao Pentester: não renderizar nada --}}
+    <div class="form-group">
+        <label for="resolved_at">Data de Mitigação</label>
+        <input type="date" name="resolved_at">
+    </div>
+    
+    <x-adminlte-text-editor name="mitigation_action" label="Ação de Mitigação">
+        {!! old('mitigation_action') !!}
+    </x-adminlte-text-editor>
+@endif
+```
+
+#### 3.4. Frontend - Edit (Editar)
+
+**No formulário EDIT, mostrar informações em modo visualização:**
+
+```php
+{{-- Campos que podem ser editados por todos --}}
+<div class="form-group">
+    <label for="description">Descrição</label>
+    <textarea name="description" required>{{ $model->description }}</textarea>
+</div>
+
+@if(!auth()->user()->hasRole('Pentester'))
+    {{-- Outros perfis podem editar --}}
+    <div class="form-group">
+        <label for="resolved_at">Data de Mitigação</label>
+        <input type="date" name="resolved_at" 
+               value="{{ $model->resolved_at?->format('Y-m-d') }}">
+    </div>
+    
+    <x-adminlte-text-editor name="mitigation_action" label="Ação de Mitigação">
+        {!! old('mitigation_action', $model->mitigation_action) !!}
+    </x-adminlte-text-editor>
+@else
+    {{-- Pentester só visualiza as informações --}}
+    @if($model->is_resolved || $model->resolved_at || $model->mitigation_action)
+        <hr class="border border-light mt-4" />
+        <div class="row mt-3">
+            <div class="col-12">
+                <h5 class="text-muted">
+                    <i class="fas fa-shield-alt"></i> Informações de Mitigação
+                </h5>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-5">Status:</dt>
+                    <dd class="col-sm-7">
+                        @if($model->is_resolved)
+                            <span class="badge badge-success">Mitigada</span>
+                        @else
+                            <span class="badge badge-danger">Não Mitigada</span>
+                        @endif
+                    </dd>
+                    
+                    @if($model->resolved_at)
+                        <dt class="col-sm-5">Data de Mitigação:</dt>
+                        <dd class="col-sm-7">{{ $model->resolved_at->format('d/m/Y') }}</dd>
+                    @endif
+                </dl>
+            </div>
+        </div>
+        
+        @if($model->mitigation_action)
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6 class="text-muted">Ação Tomada:</h6>
+                    <div class="card">
+                        <div class="card-body bg-light">
+                            {!! $model->mitigation_action !!}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endif
+@endif
+```
+
+#### 3.5. Frontend - JavaScript Condicional
+
+**Scripts devem ser condicionais ao perfil:**
+
+```php
+@section('js')
+    @if(!auth()->user()->hasRole('Pentester'))
+        <script>
+            // JavaScript para sincronização de campos
+            // Só executa se NÃO for Pentester
+            document.getElementById('resolved_at').addEventListener('change', function() {
+                document.getElementById('is_resolved').value = this.value ? '1' : '0';
+            });
+        </script>
+    @endif
+@endsection
+```
+
+### 4. Seeder de Permissões
+
+**Configurar permissões no `RolesHasPermissionTableSeeder`:**
+
+```php
+// Buscar role
+$pentester = Role::where('name', 'Pentester')->first();
+
+// Definir permissões restritas
+$userManagementPermissionNames = [
+    'Listar Usuários',
+    'Criar Usuários',
+    'Excluir Usuários',
+];
+
+// Filtrar permissões
+$permissionsForPentester = $allPermissions->reject(function ($permission) use ($aclPermissionNames, $userManagementPermissionNames) {
+    return in_array($permission->name, $aclPermissionNames) || 
+           in_array($permission->name, $userManagementPermissionNames);
+});
+
+// Atribuir
+if ($pentester) {
+    $pentester->syncPermissions($permissionsForPentester);
+}
+```
+
+### 5. ⚠️ CHECKLIST DE IMPLEMENTAÇÃO
+
+Ao implementar restrições de campos por perfil:
+
+- [ ] Definir claramente quais campos podem e não podem ser editados
+- [ ] Implementar `unset()` dos campos restritos no controller `update()`
+- [ ] Adicionar validação condicional no `prepareForValidation()`
+- [ ] Adicionar regras condicionais no método `rules()`
+- [ ] No **create.blade.php**: usar `@if(!auth()->user()->hasRole('Perfil'))` para ocultar campos
+- [ ] No **edit.blade.php**: usar `@if/@else` - input editável vs visualização somente leitura
+- [ ] Envolver JavaScript em `@if(!auth()->user()->hasRole('Perfil'))`
+- [ ] Configurar permissões corretas no seeder
+- [ ] Testar criação de registro com perfil restrito
+- [ ] Testar edição de registro com perfil restrito
+- [ ] Verificar que dados restritos não são salvos no backend
+
+### 6. ❌ ERROS COMUNS A EVITAR
+
+1. **Não** confiar apenas em restrições de frontend
+   - ✅ Sempre validar e filtrar no backend (controller)
+
+2. **Não** esquecer de remover campos do request
+   - ✅ Use `unset()` antes de salvar
+
+3. **Não** usar `readonly` em inputs sem também validar no backend
+   - ✅ Inputs readonly podem ser manipulados via DevTools
+
+4. **Não** renderizar inputs disabled/readonly no create
+   - ✅ No create, simplesmente não renderize os campos restritos
+
+5. **Não** esquecer de condicionar o JavaScript
+   - ✅ Scripts que manipulam campos restritos devem ser condicionais
+
+6. **Não** usar HTML puro para exibir informações no edit
+   - ✅ Use cards e classes AdminLTE para consistência visual
+
+---
+
 ## 🔄 CHANGELOG
 
 Este arquivo deve ser atualizado sempre que:
@@ -1638,9 +1902,12 @@ Este arquivo deve ser atualizado sempre que:
 - Novas dependências importantes forem adicionadas
 - Regras de desenvolvimento forem modificadas
 
-**Data da última atualização**: 15/01/2026
+**Data da última atualização**: 20/01/2026
 
 ### Últimas Alterações
+- **20/01/2026**: Adicionada seção completa sobre Restrição de Campos por Perfil com padrões de implementação para backend (controller e request), frontend (create e edit) e JavaScript condicional
+- **20/01/2026**: Documentado padrão de visualização somente leitura em formulários edit para perfis restritos (exemplo: Pentester)
+- **20/01/2026**: Configurado perfil Pentester no seeder com 14 permissões (exceto ACL e gerenciamento de usuários)
 - **15/01/2026**: Adicionada seção completa sobre ordenação de vulnerabilidades (display_order) com comportamentos de criação, atualização e exclusão
 - **15/01/2026**: Adicionada seção completa sobre visibilidade e controle de acesso de vulnerabilidades (is_visible) com padrões de implementação, validação e exemplos práticos
 - **15/01/2026**: Documentado uso de `hasAnyRole()` em vez de `hasRole()` com pipe para perfis privilegiados

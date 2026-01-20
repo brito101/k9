@@ -132,37 +132,83 @@
                                     </div>
                                 </div>
 
-                                <div class="d-flex flex-wrap justify-content-start align-items-end">
-                                    
-                                    <div class="col-12 col-md-3 form-group px-0 pr-md-2">
-                                        <label for="resolved_at">Data de Mitigação</label>
-                                        <input type="date" class="form-control" id="resolved_at" name="resolved_at"
-                                            value="{{ old('resolved_at', $vulnerability->resolved_at?->format('Y-m-d')) }}">
-                                        <input type="hidden" name="is_resolved" id="is_resolved"
-                                            value="{{ old('is_resolved', $vulnerability->is_resolved ? '1' : '0') }}">
-                                    </div>
+                                @if(!auth()->user()->hasRole('Pentester'))
+                                    {{-- Outros perfis podem editar campos de mitigação --}}
+                                    <div class="d-flex flex-wrap justify-content-start align-items-end">
+                                        
+                                        <div class="col-12 col-md-3 form-group px-0 pr-md-2">
+                                            <label for="resolved_at">Data de Mitigação</label>
+                                            <input type="date" class="form-control" id="resolved_at" name="resolved_at"
+                                                value="{{ old('resolved_at', $vulnerability->resolved_at?->format('Y-m-d')) }}">
+                                            <input type="hidden" name="is_resolved" id="is_resolved"
+                                                value="{{ old('is_resolved', $vulnerability->is_resolved ? '1' : '0') }}">
+                                        </div>
 
-                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2">
-                                        <div class="icheck-primary">
-                                            <input type="checkbox" style="cursor: pointer" id="is_resolved_check"
-                                                {{ $vulnerability->is_resolved ? 'checked' : '' }}>
-                                            <label for="is_resolved_check" class="my-0 ml-2">
-                                                <strong>Vulnerabilidade Mitigada</strong>
-                                            </label>
+                                        <div class="col-12 col-md-3 form-group px-0 pl-md-2">
+                                            <div class="icheck-primary">
+                                                <input type="checkbox" style="cursor: pointer" id="is_resolved_check"
+                                                    {{ $vulnerability->is_resolved ? 'checked' : '' }}>
+                                                <label for="is_resolved_check" class="my-0 ml-2">
+                                                    <strong>Vulnerabilidade Mitigada</strong>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="d-flex flex-wrap justify-content-between">
-                                    <div class="col-12 form-group px-0 mb-0">
-                                        <x-adminlte-text-editor name="mitigation_action" id="mitigation_action" label="Ação Tomada para a Mitigação"
-                                            label-class="text-black" igroup-size="md"
-                                            placeholder="Descreva a ação tomada para mitigar a vulnerabilidade..."
-                                            :config="$config">
-                                            {!! old('mitigation_action', $vulnerability->mitigation_action) !!}
-                                        </x-adminlte-text-editor>
+                                    <div class="d-flex flex-wrap justify-content-between">
+                                        <div class="col-12 form-group px-0 mb-0">
+                                            <x-adminlte-text-editor name="mitigation_action" id="mitigation_action" label="Ação Tomada para a Mitigação"
+                                                label-class="text-black" igroup-size="md"
+                                                placeholder="Descreva a ação tomada para mitigar a vulnerabilidade..."
+                                                :config="$config">
+                                                {!! old('mitigation_action', $vulnerability->mitigation_action) !!}
+                                            </x-adminlte-text-editor>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    {{-- Pentester só visualiza informações de mitigação --}}
+                                    @if($vulnerability->is_resolved || $vulnerability->resolved_at || $vulnerability->mitigation_action)
+                                        <hr class="border border-light mt-4" />
+                                        <div class="row mt-3">
+                                            <div class="col-12">
+                                                <h5 class="text-muted"><i class="fas fa-shield-alt"></i> Informações de Mitigação</h5>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <dl class="row">
+                                                    <dt class="col-sm-5">Status:</dt>
+                                                    <dd class="col-sm-7">
+                                                        @if($vulnerability->is_resolved)
+                                                            <span class="badge badge-success">Mitigada</span>
+                                                        @else
+                                                            <span class="badge badge-danger">Não Mitigada</span>
+                                                        @endif
+                                                    </dd>
+
+                                                    @if($vulnerability->resolved_at)
+                                                        <dt class="col-sm-5">Data de Mitigação:</dt>
+                                                        <dd class="col-sm-7">{{ $vulnerability->resolved_at->format('d/m/Y') }}</dd>
+                                                    @endif
+                                                </dl>
+                                            </div>
+                                        </div>
+
+                                        @if($vulnerability->mitigation_action)
+                                            <div class="row mt-3">
+                                                <div class="col-12">
+                                                    <h6 class="text-muted">Ação Tomada para a Mitigação:</h6>
+                                                    <div class="card">
+                                                        <div class="card-body bg-light">
+                                                            {!! $vulnerability->mitigation_action !!}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endif
+                                @endif
 
                             </div>
 
@@ -180,26 +226,28 @@
     </section>
 
 @section('js')
-    <script>
-        // Sync checkbox with hidden field and date
-        const checkbox = document.getElementById('is_resolved_check');
-        const hiddenField = document.getElementById('is_resolved');
-        const dateField = document.getElementById('resolved_at');
+    @if(!auth()->user()->hasRole('Pentester'))
+        <script>
+            // Sync checkbox with hidden field and date
+            const checkbox = document.getElementById('is_resolved_check');
+            const hiddenField = document.getElementById('is_resolved');
+            const dateField = document.getElementById('resolved_at');
 
-        checkbox.addEventListener('change', function() {
-            hiddenField.value = this.checked ? '1' : '0';
-            if (this.checked && !dateField.value) {
-                dateField.value = new Date().toISOString().split('T')[0];
-            } else if (!this.checked) {
-                dateField.value = '';
-            }
-        });
+            checkbox.addEventListener('change', function() {
+                hiddenField.value = this.checked ? '1' : '0';
+                if (this.checked && !dateField.value) {
+                    dateField.value = new Date().toISOString().split('T')[0];
+                } else if (!this.checked) {
+                    dateField.value = '';
+                }
+            });
 
-        dateField.addEventListener('change', function() {
-            hiddenField.value = this.value ? '1' : '0';
-            checkbox.checked = this.value ? true : false;
-        });
-    </script>
+            dateField.addEventListener('change', function() {
+                hiddenField.value = this.value ? '1' : '0';
+                checkbox.checked = this.value ? true : false;
+            });
+        </script>
+    @endif
 @endsection
 
 @endsection

@@ -10,14 +10,13 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Sistema profissional de gestão de pentests e vulnerabilidades** desenvolvido para equipes Red Team, com foco em organização, rastreabilidade e controle de testes de penetração.
+> **Sistema profissional de gestão de pentests e vulnerabilidades** desenvolvido para equipes Red Team, com foco em organização, rastreabilidade e controle de acesso granular.
 
 ## 📋 Índice
 
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Funcionalidades](#-funcionalidades)
 - [Stack Tecnológica](#-stack-tecnológica)
-- [Arquitetura](#-arquitetura)
 - [Instalação](#-instalação)
 - [Configuração](#-configuração)
 - [Uso](#-uso)
@@ -105,28 +104,6 @@
 - **PEST** - Testing framework
 - **Laravel Debugbar** - Debug toolbar
 
-## 🏗️ Architecture
-
-```
-├── app/
-│   ├── Http/Controllers/
-│   │   ├── Admin/          # Administrative controllers
-│   │   ├── Api/            # REST APIs
-│   │   └── Auth/           # Authentication
-│   ├── Models/             # Eloquent models
-│   └── Providers/          # Service providers
-├── resources/
-│   ├── views/              # Blade views
-│   ├── js/                 # JavaScript
-│   └── sass/               # SASS styles
-├── routes/
-│   ├── web.php             # Web routes
-│   └── api.php             # API routes
-└── database/
-    ├── migrations/          # Migrations
-    └── seeders/            # Seeders
-```
-
 ## 🚀 Instalação
 
 ### Pré-requisitos
@@ -138,8 +115,8 @@
 
 1. **Clone o repositório**
 ```bash
-git clone <repository-url>
-cd pentest
+git clone https://github.com/brito101/k9.git
+cd k9
 ```
 
 2. **Prepare o ambiente**
@@ -153,40 +130,30 @@ cp .env.example .env
 nano .env
 ```
 
-4. **Instale as dependências**
+4. **Inicie o ambiente Docker**
 ```bash
-composer install
+./vendor/bin/sail up -d
+```
+
+5. **Configure o Laravel e JWT**
+```bash
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan jwt:secret
+```
+
+6. **Execute as migrations e seeders**
+```bash
+./vendor/bin/sail artisan migrate --seed
+```
+
+7. **Configure o storage**
+```bash
+./vendor/bin/sail artisan storage:link
+```
+
+8. **Instale as dependências do frontend**
+```bash
 npm install
-```
-
-5. **Configure o Laravel**
-```bash
-php artisan key:generate
-php artisan jwt:secret
-```
-
-6. **Configure o Docker (opcional)**
-```bash
-# Alias para Laravel Sail
-alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
-```
-
-7. **Execute as migrations**
-```bash
-# Com Docker
-sail artisan migrate --seed
-
-# Sem Docker
-php artisan migrate --seed
-```
-
-8. **Configure o storage**
-```bash
-# Com Docker
-sail artisan storage:link
-
-# Sem Docker
-php artisan storage:link
 ```
 
 9. **Compile os assets**
@@ -205,7 +172,7 @@ npm run build
 ```env
 # Application
 APP_NAME="K9"
-APP_DES="Plataforma de gestão de pentests para Red Teams"
+APP_DESC="Plataforma de gestão de pentests para Red Teams"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost
@@ -239,11 +206,21 @@ O projeto inclui configuração completa do Docker com:
 
 ## 🎮 Uso
 
+### Alias do Sail (Opcional)
+
+Para facilitar o uso, crie um alias:
+
+```bash
+alias sail='[ -f sail ] && sh sail || sh vendor/bin/sail'
+```
+
+Depois basta usar `sail` ao invés de `./vendor/bin/sail`.
+
 ### Acesso ao Sistema
 
 **Credenciais padrão:**
 - **Email:** programador@base.com
-- **Password:** 12345678
+- **Senha:** 12345678
 
 ### Comandos Úteis
 
@@ -258,11 +235,14 @@ npm run build                 # Compilar assets (prod)
 php artisan config:cache      # Cache de configuração
 php artisan route:cache       # Cache de rotas
 
+# Testes
+./vendor/bin/pest             # Executar testes
+
 # Manutenção
 sail artisan migrate          # Executar migrations
 sail artisan db:seed          # Executar seeders
 sail artisan storage:link     # Link simbólico do storage
-sail bin pint                 # Corrigir code style
+./vendor/bin/pint             # Corrigir code style
 ```
 
 ### Módulos Principais
