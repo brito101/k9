@@ -103,9 +103,25 @@ Exemplos:
 
 ### 4. Roles (Perfis) Padrão do Sistema
 
-- **Programador**: Acesso total (incluído a própria role Programador)
-- **Administrador**: Acesso administrativo (exceto Programador)
-- **Usuário**: Acesso básico
+- **Programador**: Acesso total (incluído a própria role Programador) - 28 permissões
+- **Administrador**: Acesso administrativo (exceto ACL) - 17 permissões
+- **Pentester**: Acesso a pentests e vulnerabilidades (exceto ACL e gerenciamento de usuários)
+  - Pode editar seu próprio perfil
+  - Pode criar/editar/excluir Pentests e Vulnerabilidades
+  - NÃO pode editar campos de mitigação em Vulnerabilidades (controlado no controller)
+  - 14 permissões
+- **Gestor/Coordenador**: Visualização de pentests e vulnerabilidades
+  - Pode editar seu próprio perfil
+  - Pode SOMENTE visualizar Pentests e Vulnerabilidades (não criar/editar/excluir)
+  - 6 permissões
+- **Desenvolvedor**: Visualização e edição de mitigação de vulnerabilidades
+  - Pode editar seu próprio perfil
+  - Pode visualizar TODOS os Pentests (não criar/editar/excluir)
+  - Pode visualizar TODAS as Vulnerabilidades (não criar/excluir)
+  - Pode EDITAR Vulnerabilidades (SOMENTE campos de mitigação: `resolved_at`, `is_resolved`, `mitigation_action`)
+  - NÃO tem acesso a ACL e gerenciamento de usuários
+  - 7 permissões
+- **Usuário**: Acesso básico (sem permissões)
 
 ### 5. Seeders de Permissões
 
@@ -323,27 +339,40 @@ public function index(Request $request)
         $data = Model::all(['id', 'campo1', 'campo2']);
         
         $token = csrf_token();
+        $user = auth()->user();
 
         return DataTables::of($data)
             ->addIndexColumn()
-            ->addColumn('action', function ($row) use ($token) {
+            ->addColumn('action', function ($row) use ($token, $user) {
                 $actions = '';
                 
-                // Botão Editar
-                $actions .= '<a class="btn btn-xs btn-primary mx-1 shadow" title="Editar" 
-                    href="recurso/'.$row->id.'/edit">
-                    <i class="fa fa-lg fa-fw fa-pen"></i>
-                </a>';
+                // Botão Visualizar - verificar permissão
+                if ($user->can('Visualizar Recursos')) {
+                    $actions .= '<a class="btn btn-xs btn-info mx-1 shadow" title="Visualizar" 
+                        href="recurso/'.$row->id.'">
+                        <i class="fa fa-lg fa-fw fa-eye"></i>
+                    </a>';
+                }
                 
-                // Botão Excluir com formulário
-                $actions .= '<form method="POST" action="recurso/'.$row->id.'" class="btn btn-xs px-0">
-                    <input type="hidden" name="_method" value="DELETE">
-                    <input type="hidden" name="_token" value="'.$token.'">
-                    <button class="btn btn-xs btn-danger mx-1 shadow" title="Excluir" 
-                        onclick="return confirm(\'Confirma a exclusão?\')">
-                        <i class="fa fa-lg fa-fw fa-trash"></i>
-                    </button>
-                </form>';
+                // Botão Editar - verificar permissão
+                if ($user->can('Editar Recursos')) {
+                    $actions .= '<a class="btn btn-xs btn-primary mx-1 shadow" title="Editar" 
+                        href="recurso/'.$row->id.'/edit">
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </a>';
+                }
+                
+                // Botão Excluir - verificar permissão
+                if ($user->can('Excluir Recursos')) {
+                    $actions .= '<form method="POST" action="recurso/'.$row->id.'" class="btn btn-xs px-0">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="_token" value="'.$token.'">
+                        <button class="btn btn-xs btn-danger mx-1 shadow" title="Excluir" 
+                            onclick="return confirm(\'Confirma a exclusão?\')">
+                            <i class="fa fa-lg fa-fw fa-trash"></i>
+                        </button>
+                    </form>';
+                }
                 
                 return $actions;
             })
@@ -357,6 +386,106 @@ public function index(Request $request)
 
     return view('admin.recurso.index');
 }
+```
+
+### 2. Otimização com Database Views
+
+**Quando usar**: Quando a lógica de busca e formatação no controller ficar muito complexa (muitos joins, cálculos, formatações), considere criar uma **Database View** para simplificar as queries.
+
+**Benefícios**:
+- Performance otimizada (view pré-calculada)
+- Código do controller muito mais limpo e simples
+- Queries SQL nativas mais rápidas
+- Facilita manutenção e testes
+
+**Exemplo de estrutura**:
+
+```php
+// Migration - criar view de banco
+DB::statement("
+    CREATE OR REPLACE VIEW recursos_list AS
+    SELECT 
+        r.id,
+        r.campo1,
+        CASE 
+            WHEN r.status = 1 THEN 'Ativo'
+            ELSE 'Inativo'
+        END as status_text,
+        CASE r.prioridade
+            WHEN 'alta' THEN 1
+            WHEN 'media' THEN 2
+            ELSE 3
+        END as prioridade_order
+    FROM recursos r
+    INNER JOIN tabela_relacionada t ON r.tabela_id = t.id
+");
+
+// Model da View (app/Models/Views/RecursoList.php)
+namespace App\Models\Views;
+
+class RecursoList extends Model
+{
+    protected $table = 'recursos_list';
+    protected $primaryKey = 'id';
+    protected $keyType = 'string'; // Se for UUID
+    public $incrementing = false;
+    public $timestamps = false;
+    
+    // Bloquear operações de escrita (views são read-only)
+    public function save(array $options = []) { return false; }
+    public function delete() { return false; }
+    public function update(array $attributes = [], array $options = []) { return false; }
+}
+
+// Controller simplificado
+use App\Models\Views\RecursoList;
+
+$query = RecursoList::query();
+return DataTables::eloquent($query)
+    ->filterColumn('status_badge', function($query, $keyword) {
+        $query->whereRaw("status_text LIKE ?", ["%{$keyword}%"]);
+    })
+    ->make(true);
+```
+
+#### ⚠️ IMPORTANTE: Controle de Permissões em Botões
+
+**SEMPRE** verificar permissões antes de renderizar botões de ação nas DataTables:
+
+```php
+$user = auth()->user();
+
+->addColumn('action', function ($row) use ($token, $user) {
+    $actions = '';
+    
+    // Verificar cada permissão individualmente
+    if ($user->can('Visualizar Recursos')) {
+        $actions .= '<!-- botão visualizar -->';
+    }
+    
+    if ($user->can('Editar Recursos')) {
+        $actions .= '<!-- botão editar -->';
+    }
+    
+    if ($user->can('Excluir Recursos')) {
+        $actions .= '<!-- botão excluir -->';
+    }
+    
+    return $actions;
+})
+```
+
+**Benefícios:**
+- ✅ Usuários veem apenas botões que podem usar
+- ✅ Melhora experiência do usuário
+- ✅ Evita tentativas de ações não autorizadas
+- ✅ Interface limpa e intuitiva
+
+**Exemplo Real:**
+- **Programador/Admin**: Vê todos os botões (visualizar, editar, criar vulnerabilidade, excluir)
+- **Pentester**: Vê todos os botões (tem permissão completa em pentests e vulnerabilidades)
+- **Desenvolvedor**: Vê apenas visualizar em pentests, visualizar e editar em vulnerabilidades
+- **Gestor/Coordenador**: Vê apenas visualizar
 ```
 
 ### 2. Estrutura na View
@@ -1644,14 +1773,19 @@ Alguns perfis de usuário têm permissão para visualizar dados mas não podem e
 - ❌ **NÃO pode editar**: `resolved_at`, `is_resolved`, `mitigation_action`
 - 👁️ Pode **visualizar** campos de mitigação (sem editar)
 
-#### Desenvolvedor (a implementar)
-- Definir restrições específicas conforme necessário
+#### Desenvolvedor
+- ✅ Pode visualizar todos os pentests (não criar/editar/excluir)
+- ✅ Pode visualizar todas as vulnerabilidades (não criar/excluir)
+- ✅ Pode editar vulnerabilidades: **SOMENTE** campos de mitigação
+- ✅ Pode editar: `resolved_at`, `is_resolved`, `mitigation_action`
+- ❌ **NÃO pode editar**: `description`, `criticality`, `recommendations`, `display_order`, `is_visible`
+- 👁️ Pode **visualizar** campos gerais da vulnerabilidade (sem editar)
 
 ### 3. Padrão de Implementação
 
 #### 3.1. Backend - Controller
 
-**No método `update()`, remover campos restritos antes de salvar:**
+**No método `update()`, controlar campos editáveis por perfil:**
 
 ```php
 public function update(VulnerabilityRequest $request, string $id): RedirectResponse
@@ -1669,9 +1803,21 @@ public function update(VulnerabilityRequest $request, string $id): RedirectRespo
     // Check if user is Pentester - they cannot edit mitigation fields
     $isPentester = $user->hasRole('Pentester');
     
+    // Check if user is Developer - they can ONLY edit mitigation fields
+    $isDeveloper = $user->hasRole('Desenvolvedor');
+    
     if ($isPentester) {
         // Remove mitigation fields from data if user is Pentester
         unset($data['resolved_at'], $data['is_resolved'], $data['mitigation_action']);
+    }
+    
+    if ($isDeveloper) {
+        // Developer can ONLY edit mitigation fields, remove all other editable fields
+        $allowedFields = ['resolved_at', 'is_resolved', 'mitigation_action'];
+        $data = array_intersect_key($data, array_flip($allowedFields));
+        
+        // Keep the pentest_id for the redirect
+        $data['pentest_id'] = $vulnerability->pentest_id;
     }
     
     // ... resto da lógica de update
@@ -1685,11 +1831,19 @@ public function update(VulnerabilityRequest $request, string $id): RedirectRespo
 ```php
 protected function prepareForValidation(): void
 {
-    // Check if user is Pentester
+    // Check if user is Pentester - they cannot modify mitigation fields
     $isPentester = auth()->check() && auth()->user()->hasRole('Pentester');
     
-    if (!$isPentester) {
-        // Processar campos de mitigação apenas se não for Pentester
+    // Check if user is Developer - they can ONLY modify mitigation fields
+    $isDeveloper = auth()->check() && auth()->user()->hasRole('Desenvolvedor');
+    
+    if (!$isPentester && !$isDeveloper) {
+        // Set is_resolved based on resolved_at if not explicitly set
+        if ($this->resolved_at && !$this->has('is_resolved')) {
+            $this->merge(['is_resolved' => true]);
+        }
+    } elseif ($isDeveloper) {
+        // Developer can edit mitigation fields
         if ($this->resolved_at && !$this->has('is_resolved')) {
             $this->merge(['is_resolved' => true]);
         }
@@ -1699,18 +1853,34 @@ protected function prepareForValidation(): void
 public function rules(): array
 {
     $isPentester = auth()->check() && auth()->user()->hasRole('Pentester');
+    $isDeveloper = auth()->check() && auth()->user()->hasRole('Desenvolvedor');
     
-    $rules = [
-        'description' => 'required|string|min:10',
-        'criticality' => ['required', Rule::in(['critical', 'high', 'medium', 'low', 'informative'])],
-        // ... regras comuns
-    ];
+    $rules = [];
     
-    // Only add mitigation field validations if user is not Pentester
-    if (!$isPentester) {
-        $rules['is_resolved'] = 'nullable|boolean';
-        $rules['resolved_at'] = 'nullable|date|required_if:is_resolved,1';
-        $rules['mitigation_action'] = 'nullable|string';
+    // Developer can ONLY edit mitigation fields
+    if ($isDeveloper) {
+        $rules = [
+            'is_resolved' => 'nullable|boolean',
+            'resolved_at' => 'nullable|date|required_if:is_resolved,1',
+            'mitigation_action' => 'nullable|string',
+        ];
+    } else {
+        // All other users (except Pentester) have full validation
+        $rules = [
+            'pentest_id' => ['required', 'uuid', Rule::exists('pentests', 'id')->whereNull('deleted_at')],
+            'description' => 'required|string|min:10',
+            'criticality' => ['required', Rule::in(['critical', 'high', 'medium', 'low', 'informative'])],
+            'display_order' => 'nullable|integer|min:1',
+            'is_visible' => 'boolean',
+            'recommendations' => 'nullable|string',
+        ];
+        
+        // Only add mitigation field validations if user is not Pentester
+        if (!$isPentester) {
+            $rules['is_resolved'] = 'nullable|boolean';
+            $rules['resolved_at'] = 'nullable|date|required_if:is_resolved,1';
+            $rules['mitigation_action'] = 'nullable|string';
+        }
     }
     
     return $rules;
@@ -1743,17 +1913,60 @@ public function rules(): array
 
 #### 3.4. Frontend - Edit (Editar)
 
-**No formulário EDIT, mostrar informações em modo visualização:**
+**No formulário EDIT, controlar visualização por perfil:**
 
 ```php
-{{-- Campos que podem ser editados por todos --}}
-<div class="form-group">
-    <label for="description">Descrição</label>
-    <textarea name="description" required>{{ $model->description }}</textarea>
-</div>
+@if(!auth()->user()->hasRole('Desenvolvedor'))
+    {{-- Todos exceto Desenvolvedor podem editar campos gerais --}}
+    <div class="form-group">
+        <label for="description">Descrição</label>
+        <textarea name="description" required>{{ $model->description }}</textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="criticality">Criticidade</label>
+        <x-adminlte-select2 name="criticality" required>
+            <option value="critical" {{ $model->criticality == 'critical' ? 'selected' : '' }}>Crítica</option>
+            <option value="high" {{ $model->criticality == 'high' ? 'selected' : '' }}>Alta</option>
+            <!-- ... outras opções -->
+        </x-adminlte-select2>
+    </div>
+@else
+    {{-- Desenvolvedor só visualiza campos gerais --}}
+    <h5 class="text-muted"><i class="fas fa-bug"></i> Informações da Vulnerabilidade</h5>
+    
+    <h6 class="text-muted">Descrição:</h6>
+    <div class="card">
+        <div class="card-body bg-light">
+            {{ $model->description }}
+        </div>
+    </div>
+    
+    <dl class="row">
+        <dt class="col-sm-3">Criticidade:</dt>
+        <dd class="col-sm-9">
+            @php
+                $badges = [
+                    'critical' => '<span class="badge bg-dark">CRÍTICA</span>',
+                    'high' => '<span class="badge bg-danger">ALTA</span>',
+                    'medium' => '<span class="badge bg-warning">MÉDIA</span>',
+                    'low' => '<span class="badge bg-info">BAIXA</span>',
+                    'informative' => '<span class="badge bg-success">INFORMATIVA</span>',
+                ];
+            @endphp
+            {!! $badges[$model->criticality] ?? '-' !!}
+        </dd>
+    </dl>
+    
+    <hr class="border border-light mt-4" />
+@endif
 
 @if(!auth()->user()->hasRole('Pentester'))
-    {{-- Outros perfis podem editar --}}
+    {{-- Desenvolvedor e outros perfis podem editar campos de mitigação --}}
+    @if(auth()->user()->hasRole('Desenvolvedor'))
+        <h5 class="text-primary"><i class="fas fa-shield-alt"></i> Editar Mitigação</h5>
+    @endif
+    
     <div class="form-group">
         <label for="resolved_at">Data de Mitigação</label>
         <input type="date" name="resolved_at" 
@@ -1764,7 +1977,7 @@ public function rules(): array
         {!! old('mitigation_action', $model->mitigation_action) !!}
     </x-adminlte-text-editor>
 @else
-    {{-- Pentester só visualiza as informações --}}
+    {{-- Pentester só visualiza as informações de mitigação --}}
     @if($model->is_resolved || $model->resolved_at || $model->mitigation_action)
         <hr class="border border-light mt-4" />
         <div class="row mt-3">
@@ -1905,8 +2118,18 @@ Este arquivo deve ser atualizado sempre que:
 **Data da última atualização**: 20/01/2026
 
 ### Últimas Alterações
+- **20/01/2026**: Implementado controle de permissões em botões de ação das DataTables (verificação com `$user->can()`)
+- **20/01/2026**: Ajustado PentestController para renderizar botões condicionalmente baseado em permissões do usuário
+- **20/01/2026**: Ajustado VulnerabilityController (métodos `index()` e `datatable()`) para renderizar botões condicionalmente
+- **20/01/2026**: Adicionada seção nas guidelines sobre controle de permissões em botões de DataTables
+- **20/01/2026**: Desenvolvedor agora vê apenas botão de visualizar em pentests, e visualizar/editar em vulnerabilidades
+- **20/01/2026**: Configurado perfil **Desenvolvedor** no seeder com 7 permissões (visualização de pentests e vulnerabilidades + edição de campos de mitigação)
+- **20/01/2026**: Implementado controle de edição de vulnerabilidades para Desenvolvedor (SOMENTE campos de mitigação: `resolved_at`, `is_resolved`, `mitigation_action`)
+- **20/01/2026**: Atualizado VulnerabilityController para filtrar campos editáveis por Desenvolvedor usando `array_intersect_key()`
+- **20/01/2026**: Atualizado VulnerabilityRequest com validação condicional para Desenvolvedor (apenas campos de mitigação)
+- **20/01/2026**: Atualizada view edit de vulnerabilidades para mostrar campos gerais em modo leitura e campos de mitigação editáveis para Desenvolvedor
 - **20/01/2026**: Adicionada seção completa sobre Restrição de Campos por Perfil com padrões de implementação para backend (controller e request), frontend (create e edit) e JavaScript condicional
-- **20/01/2026**: Documentado padrão de visualização somente leitura em formulários edit para perfis restritos (exemplo: Pentester)
+- **20/01/2026**: Documentado padrão de visualização somente leitura em formulários edit para perfis restritos (exemplo: Pentester e Desenvolvedor)
 - **20/01/2026**: Configurado perfil Pentester no seeder com 14 permissões (exceto ACL e gerenciamento de usuários)
 - **15/01/2026**: Adicionada seção completa sobre ordenação de vulnerabilidades (display_order) com comportamentos de criação, atualização e exclusão
 - **15/01/2026**: Adicionada seção completa sobre visibilidade e controle de acesso de vulnerabilidades (is_visible) com padrões de implementação, validação e exemplos práticos

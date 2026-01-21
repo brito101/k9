@@ -38,6 +38,8 @@
 
                         <div class="card-body">
                             @php
+                                $isPrivilegedUser = auth()->user()->hasAnyRole(['Programador', 'Administrador', 'Pentester']);
+                                
                                 $heads = [
                                     ['label' => 'ID', 'width' => 10],
                                     ['label' => 'Ordem', 'width' => 8],
@@ -46,21 +48,35 @@
                                     'Criticidade',
                                     'Status',
                                     'Data Resolução',
-                                    ['label' => 'Ações', 'no-export' => true, 'width' => 15],
                                 ];
+                                
+                                // Adicionar coluna de visibilidade apenas para perfis privilegiados
+                                if ($isPrivilegedUser) {
+                                    $heads[] = 'Visibilidade';
+                                }
+                                
+                                $heads[] = ['label' => 'Ações', 'no-export' => true, 'width' => 15];
+
+                                $columns = [
+                                    ['data' => 'id', 'name' => 'id', 'visible' => false],
+                                    ['data' => 'display_order', 'name' => 'display_order'],
+                                    ['data' => 'pentest', 'name' => 'pentest'],
+                                    ['data' => 'description', 'name' => 'description'],
+                                    ['data' => 'criticality_badge', 'name' => 'criticality_badge', 'orderable' => true, 'searchable' => true],
+                                    ['data' => 'status_badge', 'name' => 'status_badge', 'orderable' => true, 'searchable' => true],
+                                    ['data' => 'resolved_at', 'name' => 'resolved_at'],
+                                ];
+                                
+                                // Adicionar coluna de visibilidade apenas para perfis privilegiados
+                                if ($isPrivilegedUser) {
+                                    $columns[] = ['data' => 'visibility_badge', 'name' => 'visibility_badge', 'orderable' => true, 'searchable' => true];
+                                }
+                                
+                                $columns[] = ['data' => 'action', 'name' => 'action', 'orderable' => false, 'searchable' => false];
 
                                 $config = [
                                     'ajax' => url('admin/vulnerabilities'),
-                                    'columns' => [
-                                        ['data' => 'id', 'name' => 'id', 'visible' => false],
-                                        ['data' => 'display_order', 'name' => 'display_order'],
-                                        ['data' => 'pentest', 'name' => 'pentest'],
-                                        ['data' => 'description', 'name' => 'description'],
-                                        ['data' => 'criticality_badge', 'name' => 'criticality', 'orderable' => true],
-                                        ['data' => 'status_badge', 'name' => 'is_resolved', 'orderable' => true],
-                                        ['data' => 'resolved_at', 'name' => 'resolved_at'],
-                                        ['data' => 'action', 'name' => 'action', 'orderable' => false, 'searchable' => false],
-                                    ],
+                                    'columns' => $columns,
                                     'language' => ['url' => asset('vendor/datatables/js/pt-BR.json')],
                                     'autoFill' => true,
                                     'processing' => true,

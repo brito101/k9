@@ -26,6 +26,13 @@ class RolesHasPermissionTableSeeder extends Seeder
      *   - Pode editar seu próprio perfil (Editar Usuário)
      *   - Pode SOMENTE visualizar Pentests e Vulnerabilidades (não criar/editar/excluir)
      *   - NÃO tem acesso a ACL e gerenciamento de usuários
+     * - Desenvolvedor: Pode visualizar e editar vulnerabilidades (apenas campos de mitigação)
+     *   - Pode editar seu próprio perfil (Editar Usuário)
+     *   - Pode visualizar Pentests e Vulnerabilidades
+     *   - Pode EDITAR vulnerabilidades (SOMENTE campos de mitigação)
+     *   - NÃO pode criar ou excluir Pentests
+     *   - NÃO pode criar ou excluir Vulnerabilidades
+     *   - NÃO tem acesso a ACL e gerenciamento de usuários
      *
      * Permissões de ACL (restritas ao Programador):
      * - Acessar ACL
@@ -52,6 +59,7 @@ class RolesHasPermissionTableSeeder extends Seeder
         $pentester = Role::where('name', 'Pentester')->first();
         $manager = Role::where('name', 'Gestor')->first();
         $coordinator = Role::where('name', 'Coordenador')->first();
+        $developer = Role::where('name', 'Desenvolvedor')->first();
 
         // Busca todas as permissões existentes no sistema
         $allPermissions = Permission::all();
@@ -114,6 +122,21 @@ class RolesHasPermissionTableSeeder extends Seeder
             return in_array($permission->name, $coordinatorPermissionNames);
         });
 
+        // Define permissões do Desenvolvedor (visualização + edição de vulnerabilidades)
+        $developerPermissionNames = [
+            'Editar Usuário',              // Pode editar seu próprio perfil
+            'Acessar Pentests',            // Visualizar pentests
+            'Listar Pentests',
+            'Visualizar Pentests',
+            'Listar Vulnerabilidades',     // Visualizar vulnerabilidades
+            'Visualizar Vulnerabilidades',
+            'Editar Vulnerabilidades',     // Editar vulnerabilidades (controlado no controller)
+        ];
+
+        $developerPermissions = $allPermissions->filter(function ($permission) use ($developerPermissionNames) {
+            return in_array($permission->name, $developerPermissionNames);
+        });
+
         // Atribui TODAS as permissões para o Programador
         if ($programmer) {
             $programmer->syncPermissions($allPermissions);
@@ -144,8 +167,12 @@ class RolesHasPermissionTableSeeder extends Seeder
             echo '✓ Permissões de visualização atribuídas ao perfil Coordenador ('.count($coordinatorPermissionNames)." permissões)\n";
         }
 
-        // O perfil Usuário e Desenvolvedor não recebem permissões (ficam vazios por enquanto)
-        echo "✓ Perfil Desenvolvedor mantido sem permissões (a definir)\n";
+        // Atribui permissões de visualização e edição de vulnerabilidades para o Desenvolvedor
+        if ($developer) {
+            $developer->syncPermissions($developerPermissionNames);
+            echo '✓ Permissões de visualização e edição de vulnerabilidades atribuídas ao perfil Desenvolvedor ('.count($developerPermissionNames)." permissões)\n";
+        }
+
         echo "\n📊 Total de permissões no sistema: ".$allPermissions->count()."\n";
         echo '📊 Permissões de ACL (restritas ao Programador): '.count($aclPermissionNames)."\n";
         echo '📊 Permissões de Gerenciamento de Usuários (restritas ao Programador e Administrador): '.count($userManagementPermissionNames)."\n";

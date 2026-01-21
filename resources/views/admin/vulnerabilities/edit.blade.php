@@ -54,54 +54,6 @@
 
                             <div class="card-body">
 
-                                <div class="d-flex flex-wrap justify-content-between">
-                                    <div class="col-12 form-group px-0">
-                                        <label for="description">Descrição da Vulnerabilidade</label>
-                                        <textarea class="form-control" id="description" name="description" rows="4"
-                                            placeholder="Descreva a vulnerabilidade encontrada..." required>{{ old('description', $vulnerability->description) }}</textarea>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-wrap justify-content-start align-items-center">
-                                    <div class="col-12 col-md-3 form-group px-0 pr-md-2 mb-0">
-                                        <label for="criticality">Criticidade</label>
-                                        <x-adminlte-select2 id="criticality" name="criticality" required>
-                                            <option value="">Selecione a criticidade</option>
-                                            <option value="critical"
-                                                {{ old('criticality', $vulnerability->criticality) == 'critical' ? 'selected' : '' }}>
-                                                Crítica</option>
-                                            <option value="high"
-                                                {{ old('criticality', $vulnerability->criticality) == 'high' ? 'selected' : '' }}>
-                                                Alta</option>
-                                            <option value="medium"
-                                                {{ old('criticality', $vulnerability->criticality) == 'medium' ? 'selected' : '' }}>
-                                                Média</option>
-                                            <option value="low"
-                                                {{ old('criticality', $vulnerability->criticality) == 'low' ? 'selected' : '' }}>
-                                                Baixa</option>
-                                            <option value="informative"
-                                                {{ old('criticality', $vulnerability->criticality) == 'informative' ? 'selected' : '' }}>
-                                                Informativa</option>
-                                        </x-adminlte-select2>
-                                    </div>
-                                    <div class="col-12 col-md-2 form-group px-0 px-md-2 mb-0">
-                                        <label for="display_order">Ordem</label>
-                                        <input type="number" class="form-control" id="display_order" name="display_order" 
-                                            min="1" value="{{ old('display_order', $vulnerability->display_order) }}" 
-                                            required title="Posição da vulnerabilidade na sequência de descoberta">
-                                        <small class="text-muted">Posição na sequência lógica</small>
-                                    </div>
-                                    <div class="col-12 col-md-3 form-group px-0 pl-md-2 mb-0">
-                                        <div class="icheck-primary d-inline">
-                                            <input type="checkbox" id="is_visible" name="is_visible" value="1" 
-                                                {{ old('is_visible', $vulnerability->is_visible) ? 'checked' : '' }}>
-                                            <label for="is_visible" class="mt-2 ml-2">
-                                                Visível
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 @php
                                     $config = [
                                         'height' => '200',
@@ -121,6 +73,56 @@
                                     ];
                                 @endphp
 
+                                @if(!auth()->user()->hasRole('Desenvolvedor'))
+                                    {{-- Todos exceto Desenvolvedor podem editar campos gerais --}}
+                                    <div class="d-flex flex-wrap justify-content-between">
+                                        <div class="col-12 form-group px-0">
+                                            <label for="description">Descrição da Vulnerabilidade</label>
+                                            <textarea class="form-control" id="description" name="description" rows="4"
+                                                placeholder="Descreva a vulnerabilidade encontrada..." required>{{ old('description', $vulnerability->description) }}</textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap justify-content-start align-items-center">
+                                        <div class="col-12 col-md-3 form-group px-0 pr-md-2 mb-0">
+                                            <label for="criticality">Criticidade</label>
+                                            <x-adminlte-select2 id="criticality" name="criticality" required>
+                                                <option value="">Selecione a criticidade</option>
+                                                <option value="critical"
+                                                    {{ old('criticality', $vulnerability->criticality) == 'critical' ? 'selected' : '' }}>
+                                                    Crítica</option>
+                                                <option value="high"
+                                                    {{ old('criticality', $vulnerability->criticality) == 'high' ? 'selected' : '' }}>
+                                                    Alta</option>
+                                                <option value="medium"
+                                                    {{ old('criticality', $vulnerability->criticality) == 'medium' ? 'selected' : '' }}>
+                                                    Média</option>
+                                                <option value="low"
+                                                    {{ old('criticality', $vulnerability->criticality) == 'low' ? 'selected' : '' }}>
+                                                    Baixa</option>
+                                                <option value="informative"
+                                                    {{ old('criticality', $vulnerability->criticality) == 'informative' ? 'selected' : '' }}>
+                                                    Informativa</option>
+                                            </x-adminlte-select2>
+                                        </div>
+                                        <div class="col-12 col-md-2 form-group px-0 px-md-2 mb-0">
+                                            <label for="display_order">Ordem</label>
+                                            <input type="number" class="form-control" id="display_order" name="display_order" 
+                                                min="1" value="{{ old('display_order', $vulnerability->display_order) }}" 
+                                                required title="Posição da vulnerabilidade na sequência de descoberta">
+                                            <small class="text-muted">Posição na sequência lógica</small>
+                                        </div>
+                                        <div class="col-12 col-md-3 form-group px-0 pl-md-2 mb-0">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="checkbox" id="is_visible" name="is_visible" value="1" 
+                                                    {{ old('is_visible', $vulnerability->is_visible) ? 'checked' : '' }}>
+                                                <label for="is_visible" class="mt-2 ml-2">
+                                                    Visível
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="d-flex flex-wrap justify-content-between">
                                     <div class="col-12 form-group px-0 mb-0">
                                         <x-adminlte-text-editor name="recommendations" id="recommendations" label="Recomendações"
@@ -131,9 +133,83 @@
                                         </x-adminlte-text-editor>
                                     </div>
                                 </div>
+                                @else
+                                    {{-- Desenvolvedor só visualiza campos gerais --}}
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h5 class="text-muted"><i class="fas fa-bug"></i> Informações da Vulnerabilidade</h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <h6 class="text-muted">Descrição:</h6>
+                                            <div class="card">
+                                                <div class="card-body bg-light">
+                                                    {{ $vulnerability->description }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <dl class="row">
+                                                <dt class="col-sm-5">Criticidade:</dt>
+                                                <dd class="col-sm-7">
+                                                    @php
+                                                        $badges = [
+                                                            'critical' => '<span class="badge" style="background-color: #000000; color: #ffffff;">CRÍTICA</span>',
+                                                            'high' => '<span class="badge" style="background-color: #dc3545; color: #ffffff;">ALTA</span>',
+                                                            'medium' => '<span class="badge" style="background-color: #fd7e14; color: #ffffff;">MÉDIA</span>',
+                                                            'low' => '<span class="badge" style="background-color: #17a2b8; color: #ffffff;">BAIXA</span>',
+                                                            'informative' => '<span class="badge" style="background-color: #28a745; color: #ffffff;">INFORMATIVA</span>',
+                                                        ];
+                                                    @endphp
+                                                    {!! $badges[$vulnerability->criticality] ?? '-' !!}
+                                                </dd>
+
+                                                <dt class="col-sm-5">Ordem:</dt>
+                                                <dd class="col-sm-7">{{ $vulnerability->display_order }}</dd>
+
+                                                <dt class="col-sm-5">Visibilidade:</dt>
+                                                <dd class="col-sm-7">
+                                                    @if($vulnerability->is_visible)
+                                                        <span class="badge badge-success">Visível</span>
+                                                    @else
+                                                        <span class="badge badge-secondary">Oculta</span>
+                                                    @endif
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+
+                                    @if($vulnerability->recommendations)
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <h6 class="text-muted">Recomendações:</h6>
+                                                <div class="card">
+                                                    <div class="card-body bg-light">
+                                                        {!! $vulnerability->recommendations !!}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <hr class="border border-light mt-4" />
+                                @endif
 
                                 @if(!auth()->user()->hasRole('Pentester'))
-                                    {{-- Outros perfis podem editar campos de mitigação --}}
+                                    {{-- Desenvolvedor e outros perfis podem editar campos de mitigação --}}
+                                    @if(auth()->user()->hasRole('Desenvolvedor'))
+                                        <div class="row mt-3">
+                                            <div class="col-12">
+                                                <h5><i class="fas fa-shield-alt"></i> Editar Mitigação</h5>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    
                                     <div class="d-flex flex-wrap justify-content-start align-items-end">
                                         
                                         <div class="col-12 col-md-3 form-group px-0 pr-md-2">
@@ -248,6 +324,6 @@
             });
         </script>
     @endif
-@endsection
+@stop
 
 @endsection
